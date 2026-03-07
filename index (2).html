@@ -1,0 +1,3123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cornclave — Farm Machinery Rental & Agri Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   RESET & ROOT
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --soil:    #1C1209;
+  --bark:    #3A2010;
+  --earth:   #5C3D1E;12
+  --moss:    #2D5A1B;
+  --leaf:    #4A8C35;
+  --sage:    #7AAD5F;
+  --wheat:   #D4A843;
+  --amber:   #E8B84B;
+  --cream:   #F4EDD6;
+  --mist:    #FAF7F0;
+  --rust:    #B54B1A;
+  --sky:     #C8DDB8;
+  --text:    #140E06;
+  --muted:   #7A6347;
+  --border:  rgba(60,32,10,0.1);
+  --shadow:  rgba(28,18,9,0.15);
+  --r-sm:    4px;
+  --r-md:    8px;
+  --r-lg:    16px;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--mist);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+#cursor-dot {
+  position: fixed; width: 8px; height: 8px;
+  background: var(--wheat); border-radius: 50%;
+  pointer-events: none; z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: background 0.2s;
+}
+#cursor-circle {
+  position: fixed; width: 40px; height: 40px;
+  border: 1.5px solid var(--leaf); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s, height 0.25s, border-color 0.25s, opacity 0.2s;
+}
+body.hovering #cursor-circle { width: 56px; height: 56px; border-color: var(--amber); }
+body.clicking #cursor-dot { background: var(--rust); transform: translate(-50%,-50%) scale(1.8); }
+
+a, button, [role="button"], .card, .eq-card, label { cursor: none !important; }
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 64px;
+  background: rgba(250,247,240,0.9);
+  backdrop-filter: blur(16px) saturate(1.8);
+  border-bottom: 1px solid transparent;
+  transition: padding 0.3s, border-color 0.3s, background 0.3s;
+}
+nav.stuck {
+  padding: 14px 64px;
+  border-color: var(--border);
+  background: rgba(250,247,240,0.97);
+}
+
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 900;
+  color: var(--soil); letter-spacing: -0.01em;
+}
+.nav-brand-icon {
+  width: 36px; height: 36px;
+  background: var(--moss);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  transition: transform 0.2s;
+}
+.nav-brand:hover .nav-brand-icon { transform: rotate(-6deg); }
+.nav-brand em { color: var(--leaf); font-style: normal; }
+
+.nav-center { display: flex; gap: 8px; }
+.nav-link {
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+  text-decoration: none; padding: 8px 14px;
+  border-radius: 100px;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-link:hover { color: var(--moss); background: rgba(45,90,27,0.06); }
+.nav-link.active { color: var(--moss); }
+
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.nav-btn-ghost {
+  font-size: 0.82rem; font-weight: 500; color: var(--soil);
+  background: none; border: 1px solid var(--border);
+  padding: 9px 20px; border-radius: 100px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.nav-btn-ghost:hover { border-color: var(--moss); color: var(--moss); }
+.nav-btn-solid {
+  font-size: 0.82rem; font-weight: 600; color: #fff;
+  background: var(--moss); border: none;
+  padding: 10px 22px; border-radius: 100px;
+  transition: background 0.2s, transform 0.15s;
+  box-shadow: 0 2px 12px rgba(45,90,27,0.3);
+}
+.nav-btn-solid:hover { background: var(--bark); transform: translateY(-1px); }
+
+/* Cart badge */
+.cart-btn {
+  position: relative;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--cream); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.cart-btn:hover { background: var(--sky); }
+.cart-count {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 18px; height: 18px; border-radius: 9px;
+  background: var(--rust); color: #fff;
+  font-size: 0.65rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+  opacity: 0; transform: scale(0);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.cart-count.visible { opacity: 1; transform: scale(1); }
+
+/* Hamburger (mobile) */
+.nav-hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; padding: 8px;
+}
+.nav-hamburger span {
+  width: 24px; height: 2px; background: var(--soil);
+  border-radius: 2px; transition: transform 0.3s, opacity 0.3s;
+  display: block;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile drawer */
+.mobile-drawer {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--mist); z-index: 999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.mobile-drawer.open { opacity: 1; pointer-events: all; }
+.mobile-drawer a {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem; font-weight: 700; color: var(--soil);
+  text-decoration: none; letter-spacing: -0.01em;
+  transition: color 0.2s;
+}
+.mobile-drawer a:hover { color: var(--moss); }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  min-height: 100vh;
+  padding: 120px 64px 80px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; gap: 60px;
+  position: relative; overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 80% at 80% 40%, rgba(74,140,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 10% 90%, rgba(212,168,67,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(200,221,184,0.15) 0%, transparent 50%);
+}
+
+/* Animated grain overlay */
+.hero-grain {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+.hero-left { position: relative; z-index: 2; }
+
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(45,90,27,0.08); border: 1px solid rgba(45,90,27,0.15);
+  color: var(--moss); border-radius: 100px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 6px 14px;
+  margin-bottom: 32px;
+  animation: fadeSlideUp 0.8s ease both 0.1s;
+}
+.hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--leaf); }
+
+h1.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.2rem, 5.5vw, 5.8rem);
+  font-weight: 900; line-height: 1.0;
+  color: var(--soil); letter-spacing: -0.03em;
+  margin-bottom: 28px;
+  animation: fadeSlideUp 0.8s ease both 0.25s;
+}
+h1.hero-title em {
+  font-style: italic; color: var(--leaf);
+  display: block;
+}
+
+.hero-desc {
+  font-size: 1.05rem; line-height: 1.8; color: var(--muted);
+  max-width: 440px; margin-bottom: 40px;
+  animation: fadeSlideUp 0.8s ease both 0.4s;
+}
+
+.hero-ctas {
+  display: flex; gap: 14px; align-items: center;
+  margin-bottom: 64px;
+  animation: fadeSlideUp 0.8s ease both 0.55s;
+}
+.cta-primary {
+  background: var(--moss); color: #fff;
+  font-size: 0.88rem; font-weight: 600; letter-spacing: 0.04em;
+  padding: 16px 36px; border-radius: 100px; border: none;
+  box-shadow: 0 4px 20px rgba(45,90,27,0.35);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.cta-primary:hover { background: var(--bark); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(45,90,27,0.4); }
+.cta-secondary {
+  color: var(--soil); font-size: 0.88rem; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none; padding: 16px 20px;
+  transition: color 0.2s;
+}
+.cta-secondary:hover { color: var(--moss); }
+.cta-secondary svg { transition: transform 0.2s; }
+.cta-secondary:hover svg { transform: translateX(4px); }
+
+.hero-stats {
+  display: flex; gap: 48px;
+  animation: fadeSlideUp 0.8s ease both 0.7s;
+}
+.hero-stat-n {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem; font-weight: 900; color: var(--soil);
+  line-height: 1; letter-spacing: -0.02em;
+}
+.hero-stat-l {
+  font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-top: 4px;
+}
+
+/* Hero right visual */
+.hero-right {
+  position: relative; z-index: 2;
+  animation: fadeIn 1s ease both 0.3s;
+}
+
+.hero-visual-wrap {
+  position: relative; width: 100%; aspect-ratio: 4/4.5;
+  max-width: 480px; margin-left: auto;
+}
+
+.hero-img-main {
+  position: absolute; top: 0; left: 16px; right: 0; bottom: 48px;
+  border-radius: 20px; overflow: hidden;
+  background: var(--soil);
+  box-shadow: 0 40px 100px rgba(28,18,9,0.3);
+}
+.hero-img-main img {
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0.75; mix-blend-mode: luminosity;
+  transition: opacity 0.3s;
+}
+.hero-img-main:hover img { opacity: 0.9; }
+
+.hero-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, transparent 40%, rgba(28,18,9,0.85) 100%);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 32px;
+}
+.hero-img-label {
+  font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(244,237,214,0.5); margin-bottom: 8px;
+}
+.hero-img-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 700; color: #fff;
+  line-height: 1.2;
+}
+.hero-img-sub { font-size: 0.8rem; color: rgba(244,237,214,0.55); margin-top: 4px; }
+
+.hero-float-card {
+  position: absolute; bottom: 0; left: 0;
+  background: var(--cream);
+  border-radius: 16px; padding: 22px 26px;
+  box-shadow: 0 12px 48px rgba(28,18,9,0.12);
+  min-width: 200px;
+  animation: floatUpDown 5s ease-in-out infinite;
+}
+.hero-float-card .fc-label {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+}
+.hero-float-card .fc-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem; font-weight: 900; color: var(--moss);
+  line-height: 1; margin-bottom: 4px;
+}
+.hero-float-card .fc-sub { font-size: 0.78rem; color: var(--muted); }
+
+.hero-badge-pill {
+  position: absolute; top: 24px; right: -16px;
+  background: var(--wheat); color: var(--soil);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+  padding: 8px 16px; border-radius: 100px;
+  box-shadow: 0 4px 16px rgba(212,168,67,0.4);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   MARQUEE TICKER
+   ============================================================ */
+.ticker {
+  background: var(--soil); padding: 14px 0; overflow: hidden;
+  border-top: 1px solid var(--bark); border-bottom: 1px solid var(--bark);
+}
+.ticker-track {
+  display: flex; gap: 64px; width: max-content;
+  animation: ticker 30s linear infinite;
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; color: rgba(244,237,214,0.4);
+  white-space: nowrap;
+}
+.ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); }
+
+/* ============================================================
+   SECTION COMMONS
+   ============================================================ */
+section { padding: 96px 64px; }
+
+.section-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--moss); margin-bottom: 16px;
+}
+.section-eyebrow::before {
+  content: ''; width: 28px; height: 2px;
+  background: var(--moss); border-radius: 1px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+  font-weight: 900; color: var(--soil); line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================
+   EQUIPMENT SECTION
+   ============================================================ */
+.equipment-section { background: var(--mist); }
+
+.eq-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 52px; gap: 32px;
+}
+.eq-header-left { flex: 1; }
+.eq-header-desc {
+  font-size: 0.95rem; line-height: 1.75; color: var(--muted);
+  max-width: 460px; margin-top: 12px;
+}
+
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 8px 18px; border-radius: 100px;
+  font-size: 0.78rem; font-weight: 500; letter-spacing: 0.04em;
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.filter-btn:hover, .filter-btn.on {
+  background: var(--moss); color: #fff; border-color: var(--moss);
+}
+
+.eq-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+
+.eq-card {
+  background: #fff; border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--border);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+}
+.eq-card:hover { transform: translateY(-8px); box-shadow: 0 24px 64px var(--shadow); }
+
+.eq-img-wrap {
+  position: relative; height: 220px; overflow: hidden;
+  background: var(--sky);
+}
+.eq-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.eq-card:hover .eq-img-wrap img { transform: scale(1.06); }
+
+/* fallback if no image */
+.eq-img-wrap .eq-emoji {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4.5rem;
+}
+
+.eq-status-badge {
+  position: absolute; top: 14px; left: 14px;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 100px;
+}
+.status-available { background: rgba(74,140,53,0.15); color: var(--moss); }
+.status-rented { background: rgba(181,75,26,0.15); color: var(--rust); }
+
+.eq-type-chip {
+  position: absolute; top: 14px; right: 14px;
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
+  background: rgba(28,18,9,0.55); color: rgba(244,237,214,0.9);
+  backdrop-filter: blur(4px);
+}
+
+.eq-body { padding: 24px; }
+
+.eq-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem; font-weight: 700; color: var(--soil);
+  margin-bottom: 8px; line-height: 1.3;
+}
+
+.eq-meta {
+  display: flex; gap: 14px; margin-bottom: 14px;
+}
+.eq-meta-item {
+  font-size: 0.72rem; color: var(--muted);
+  display: flex; align-items: center; gap: 4px;
+}
+
+.eq-desc {
+  font-size: 0.84rem; line-height: 1.65; color: var(--muted);
+  margin-bottom: 20px; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.eq-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 18px; border-top: 1px solid var(--border);
+}
+
+.eq-price-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 900; color: var(--moss);
+}
+.eq-price-period { font-size: 0.72rem; color: var(--muted); margin-left: 2px; }
+
+.eq-book-btn {
+  background: var(--soil); color: var(--cream);
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+  padding: 10px 22px; border-radius: 100px; border: none;
+  transition: background 0.2s, transform 0.15s;
+}
+.eq-book-btn:hover:not(:disabled) { background: var(--moss); transform: translateY(-1px); }
+.eq-book-btn:disabled { background: #ccc; }
+
+/* ============================================================
+   EQUIPMENT DETAIL OVERLAY
+   ============================================================ */
+#eq-detail {
+  position: fixed; inset: 0; z-index: 2000;
+  background: var(--mist); overflow-y: auto;
+  opacity: 0; pointer-events: none;
+  transform: translateY(32px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+#eq-detail.open { opacity: 1; pointer-events: all; transform: none; }
+
+.detail-wrap { max-width: 1320px; margin: 0 auto; padding: 100px 64px 64px; }
+
+.detail-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.85rem; font-weight: 500; color: var(--muted);
+  background: none; border: none; margin-bottom: 40px;
+  transition: color 0.2s, gap 0.2s;
+}
+.detail-back:hover { color: var(--moss); gap: 12px; }
+
+.detail-layout {
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 56px;
+}
+
+.detail-gallery {
+  border-radius: 16px; overflow: hidden; background: #fff;
+  box-shadow: 0 24px 72px var(--shadow);
+}
+.detail-main-img {
+  width: 100%; height: 460px; object-fit: cover; display: block;
+}
+.detail-thumbs {
+  display: flex; gap: 12px; padding: 16px 20px;
+  border-top: 1px solid var(--border); background: #fff;
+}
+.detail-thumb {
+  width: 72px; height: 72px; object-fit: cover; border-radius: 10px;
+  border: 2px solid transparent; opacity: 0.55;
+  transition: border-color 0.2s, opacity 0.2s;
+}
+.detail-thumb.active, .detail-thumb:hover { border-color: var(--moss); opacity: 1; }
+
+.detail-info { display: flex; flex-direction: column; gap: 24px; }
+
+.detail-status-badge {
+  display: inline-block; font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 100px;
+}
+.detail-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.6rem; font-weight: 900; color: var(--soil);
+  line-height: 1.1; letter-spacing: -0.02em; margin: 12px 0 8px;
+}
+.detail-location {
+  font-size: 0.9rem; color: var(--muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.detail-rating { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.detail-stars { color: var(--amber); font-size: 1rem; }
+.detail-review-count { font-size: 0.82rem; color: var(--muted); }
+
+.detail-price-box {
+  background: #fff; padding: 28px; border-radius: 14px;
+  box-shadow: 0 6px 28px rgba(28,18,9,0.08);
+}
+.detail-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; }
+.detail-price-main {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem; font-weight: 900; color: var(--moss);
+}
+.detail-price-per { font-size: 1rem; color: var(--muted); }
+.detail-price-note {
+  font-size: 0.82rem; color: var(--muted); margin-bottom: 20px;
+  padding-bottom: 18px; border-bottom: 1px solid var(--border);
+}
+.detail-book-btn {
+  width: 100%; padding: 18px; border-radius: 12px; border: none;
+  background: var(--moss); color: #fff;
+  font-size: 1rem; font-weight: 600; letter-spacing: 0.04em;
+  box-shadow: 0 4px 20px rgba(45,90,27,0.3);
+  transition: background 0.2s, transform 0.15s;
+}
+.detail-book-btn:hover:not(:disabled) { background: var(--bark); transform: translateY(-2px); }
+.detail-book-btn:disabled { background: #ccc; box-shadow: none; }
+
+.detail-owner-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 22px; background: #fff; border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(28,18,9,0.06);
+}
+.detail-owner-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--moss); color: #fff;
+  font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.detail-owner-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--soil);
+}
+.detail-owner-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+/* Lower detail sections */
+.detail-sections { margin-top: 52px; display: grid; grid-template-columns: 2fr 1fr; gap: 28px; }
+.detail-section-card {
+  background: #fff; border-radius: 14px; padding: 32px;
+  box-shadow: 0 4px 16px rgba(28,18,9,0.05);
+}
+.detail-section-card + .detail-section-card { margin-top: 20px; }
+.detail-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; font-weight: 700; color: var(--soil);
+  margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+}
+.detail-section-title::before {
+  content: ''; width: 4px; height: 22px; background: var(--moss); border-radius: 2px;
+}
+
+.detail-description { font-size: 0.95rem; line-height: 1.85; color: var(--muted); }
+
+.specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.spec-chip {
+  padding: 14px 16px; background: var(--mist); border-radius: 10px;
+}
+.spec-label {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+.spec-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--soil);
+}
+
+.features-list { display: flex; flex-direction: column; gap: 12px; }
+.feature-item {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.9rem; color: var(--muted);
+}
+.feature-item::before {
+  content: '✓'; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--moss); color: #fff;
+  font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── LIVE AVAILABILITY CALENDAR ─────────────────────────────────────────── */
+.lc-wrap { user-select: none; }
+
+/* Month navigation bar */
+.lc-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.lc-month-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 900; color: var(--soil);
+}
+.lc-arrow {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--mist); border: 1px solid var(--border);
+  color: var(--muted); font-size: 1.1rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s, border-color .15s;
+  cursor: none;
+}
+.lc-arrow:not(:disabled):hover { background: var(--moss); color: #fff; border-color: var(--moss); }
+.lc-arrow:disabled { opacity: .28; cursor: not-allowed; }
+
+/* 7-col grid */
+.lc-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+
+/* Day-of-week headers */
+.lc-dow {
+  text-align: center; font-size: .58rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); padding: 4px 0 8px;
+}
+
+/* Individual date cells */
+.lc-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: .78rem; font-weight: 500; border-radius: 8px;
+  position: relative;
+  transition: background .12s, color .12s, transform .1s;
+  cursor: none;
+}
+.lc-empty   { pointer-events: none; }
+.lc-past    { color: rgba(122,99,71,.22); pointer-events: none; }
+.lc-booked  {
+  background: rgba(181,75,26,.08); color: rgba(181,75,26,.5);
+  pointer-events: none; text-decoration: line-through;
+}
+.lc-avail   { color: var(--soil); }
+.lc-avail:hover {
+  background: rgba(45,90,27,.1); color: var(--moss);
+  transform: scale(1.14);
+}
+
+/* Today dot */
+.lc-today::after {
+  content: ''; position: absolute; bottom: 3px; left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--amber);
+}
+.lc-today.lc-s::after,
+.lc-today.lc-e::after { display: none; }
+
+/* Selected start */
+.lc-s {
+  background: var(--moss) !important; color: #fff !important;
+  font-weight: 700; border-radius: 8px 0 0 8px;
+  box-shadow: 0 2px 10px rgba(45,90,27,.45);
+  z-index: 1;
+}
+/* Selected end */
+.lc-e {
+  background: var(--moss) !important; color: #fff !important;
+  font-weight: 700; border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 10px rgba(45,90,27,.45);
+  z-index: 1;
+}
+/* Single-day selection */
+.lc-s.lc-e { border-radius: 8px !important; }
+
+/* Confirmed range fill */
+.lc-range { background: rgba(45,90,27,.11); color: var(--moss); border-radius: 0; font-weight: 600; }
+
+/* Hover ghost preview */
+.lc-ghost      { background: rgba(45,90,27,.06); color: var(--moss); border-radius: 0; }
+.lc-ghost-s    { background: rgba(45,90,27,.13); border-radius: 8px 0 0 8px; }
+.lc-ghost-e    { background: rgba(45,90,27,.13); border-radius: 0 8px 8px 0; }
+
+/* Animated price summary card */
+.lc-price-card {
+  margin-top: 16px;
+  background: linear-gradient(135deg, rgba(45,90,27,.07), rgba(74,140,53,.03));
+  border: 1px solid rgba(45,90,27,.17); border-radius: 14px; overflow: hidden;
+  max-height: 0; opacity: 0;
+  transition: max-height .38s ease, opacity .28s ease;
+}
+.lc-price-card.open { max-height: 280px; opacity: 1; }
+.lc-price-inner { padding: 16px 18px; }
+.lc-price-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .82rem; color: var(--muted); margin-bottom: 7px;
+}
+.lc-price-row strong { color: var(--soil); font-weight: 600; }
+.lc-price-sep { height: 1px; background: rgba(45,90,27,.12); margin: 10px 0; }
+.lc-price-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.lc-price-total-label { font-size: .85rem; font-weight: 700; color: var(--soil); }
+.lc-price-total-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem; font-weight: 900; color: var(--moss);
+}
+.lc-book-btn {
+  width: 100%; margin-top: 14px;
+  background: var(--moss); color: #fff; border: none;
+  border-radius: 10px; padding: 13px 20px;
+  font-size: .88rem; font-weight: 700; letter-spacing: .02em;
+  box-shadow: 0 4px 16px rgba(45,90,27,.3);
+  transition: background .18s, transform .12s;
+  cursor: none; display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.lc-book-btn:hover { background: var(--bark); transform: translateY(-1px); }
+.lc-clear-btn {
+  width: 100%; margin-top: 6px; background: none; color: var(--muted);
+  border: none; font-size: .74rem; text-decoration: underline;
+  cursor: none; padding: 4px;
+}
+.lc-clear-btn:hover { color: var(--rust); }
+
+/* Instruction hint */
+.lc-hint {
+  margin-top: 12px; text-align: center;
+  font-size: .73rem; color: var(--muted); font-style: italic;
+  min-height: 17px; transition: color .2s;
+}
+.lc-hint.picking { color: var(--moss); font-style: normal; font-weight: 600; }
+
+/* Legend row */
+.lc-legend { display: flex; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+.lc-legend-item { display: flex; align-items: center; gap: 5px; font-size: .7rem; color: var(--muted); }
+.lc-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.lcl-avail  { background: rgba(45,90,27,.15); border: 1.5px solid var(--moss); }
+.lcl-booked { background: rgba(181,75,26,.22); }
+.lcl-sel    { background: var(--moss); }
+.lcl-range  { background: rgba(45,90,27,.13); }
+
+/* ============================================================
+   HOW IT WORKS
+   ============================================================ */
+.how-section { background: var(--soil); position: relative; overflow: hidden; }
+.how-section::before {
+  content: ''; position: absolute; top: -30%; right: -15%;
+  width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(74,140,53,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.how-section .section-eyebrow { color: rgba(212,168,67,0.7); }
+.how-section .section-eyebrow::before { background: rgba(212,168,67,0.5); }
+.how-section .section-title { color: var(--cream); }
+.how-section .section-title em { color: var(--amber); font-style: italic; }
+.how-desc { font-size: 0.95rem; line-height: 1.8; color: rgba(244,237,214,0.5); margin-top: 16px; }
+
+.steps { display: flex; flex-direction: column; }
+.step {
+  display: grid; grid-template-columns: 56px 1fr;
+  gap: 24px; padding: 28px 0;
+  border-bottom: 1px solid rgba(244,237,214,0.07);
+  transition: padding-left 0.3s;
+}
+.step:last-child { border: none; }
+.step:hover { padding-left: 10px; }
+.step-n {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem; font-weight: 900;
+  color: rgba(212,168,67,0.18); line-height: 1;
+  transition: color 0.3s;
+}
+.step:hover .step-n { color: var(--amber); }
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem; font-weight: 700; color: var(--cream); margin-bottom: 8px;
+}
+.step-desc { font-size: 0.84rem; line-height: 1.65; color: rgba(244,237,214,0.45); }
+
+/* ============================================================
+   FARM PRODUCTS
+   ============================================================ */
+.products-section { background: #fff; }
+.products-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 44px;
+}
+.products-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+}
+
+.prod-card {
+  border-radius: 16px; overflow: hidden; background: var(--mist);
+  border: 1px solid var(--border);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+}
+.prod-card:hover { transform: translateY(-6px); box-shadow: 0 20px 52px var(--shadow); }
+
+.prod-img {
+  height: 175px; overflow: hidden; position: relative; background: var(--sky);
+}
+.prod-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+.prod-card:hover .prod-img img { transform: scale(1.08); }
+.prod-img .prod-emoji {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 4rem;
+}
+
+.prod-body { padding: 18px; }
+.prod-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem; font-weight: 700; color: var(--soil); margin-bottom: 4px;
+}
+.prod-farmer { font-size: 0.72rem; color: var(--muted); margin-bottom: 14px; }
+.prod-footer { display: flex; align-items: center; justify-content: space-between; }
+.prod-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; font-weight: 900; color: var(--moss);
+}
+.prod-add {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--moss); color: #fff; border: none;
+  font-size: 1.3rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.25s;
+}
+.prod-add:hover { background: var(--bark); transform: rotate(90deg); }
+
+/* ============================================================
+   TESTIMONIALS
+   ============================================================ */
+.testimonials-section { background: var(--cream); }
+.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 52px; }
+.testi-card {
+  background: #fff; border-radius: 16px; padding: 36px;
+  border: 1px solid rgba(60,32,10,0.07);
+  position: relative; transition: transform 0.3s;
+}
+.testi-card:hover { transform: translateY(-4px); }
+.testi-card::before {
+  content: '"';
+  position: absolute; top: 20px; right: 28px;
+  font-family: 'Playfair Display', serif;
+  font-size: 7rem; font-weight: 900; line-height: 1;
+  color: rgba(45,90,27,0.07);
+}
+.testi-stars { color: var(--amber); margin-bottom: 18px; font-size: 0.9rem; }
+.testi-text {
+  font-size: 0.9rem; line-height: 1.8; color: var(--muted);
+  font-style: italic; margin-bottom: 28px;
+}
+.testi-author { display: flex; align-items: center; gap: 14px; }
+.testi-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--moss); color: #fff;
+  font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.testi-name { font-size: 0.9rem; font-weight: 600; color: var(--soil); }
+.testi-role { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+/* ============================================================
+   CTA SECTION
+   ============================================================ */
+.cta-section {
+  background: var(--moss); text-align: center; position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: ''; position: absolute;
+  top: -200px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 65%);
+}
+.cta-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-weight: 900; color: #fff; line-height: 1.1;
+  letter-spacing: -0.02em; margin: 20px auto; max-width: 620px;
+}
+.cta-desc { font-size: 1rem; color: rgba(255,255,255,0.65); max-width: 480px; margin: 0 auto 44px; line-height: 1.75; }
+.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-white {
+  background: #fff; color: var(--moss);
+  font-size: 0.88rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 16px 40px; border-radius: 100px; border: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  transition: transform 0.15s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.btn-outline-white {
+  background: transparent; color: #fff;
+  font-size: 0.88rem; font-weight: 500;
+  padding: 15px 36px; border-radius: 100px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  transition: border-color 0.2s, background 0.2s;
+  text-decoration: none;
+}
+.btn-outline-white:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  background: var(--soil); padding: 72px 64px 40px;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 60px; }
+.footer-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 900; color: var(--cream); margin-bottom: 14px;
+}
+.footer-brand-name em { color: var(--sage); font-style: normal; }
+.footer-brand-desc { font-size: 0.84rem; line-height: 1.75; color: rgba(244,237,214,0.35); max-width: 280px; }
+.footer-col h5 {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: rgba(244,237,214,0.3); margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-col a {
+  font-size: 0.84rem; color: rgba(244,237,214,0.45);
+  text-decoration: none; transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--cream); }
+.footer-bottom {
+  border-top: 1px solid rgba(244,237,214,0.07); padding-top: 28px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.footer-copy { font-size: 0.78rem; color: rgba(244,237,214,0.25); }
+.footer-mpesa { font-size: 0.72rem; color: rgba(244,237,214,0.2); }
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(28,18,9,0.75);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: #fff; border-radius: 20px; width: 90%; max-width: 520px;
+  padding: 44px; position: relative;
+  transform: scale(0.94) translateY(24px);
+  transition: transform 0.35s cubic-bezier(0.34,1.3,0.64,1);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal-close {
+  position: absolute; top: 18px; right: 20px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--mist); border: none;
+  font-size: 1.1rem; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.modal-close:hover { background: var(--border); color: var(--soil); }
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem; font-weight: 900; color: var(--soil);
+  margin-bottom: 8px; letter-spacing: -0.02em;
+}
+.modal-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 28px; line-height: 1.65; }
+
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block; font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+.form-input, .form-select {
+  width: 100%; padding: 13px 16px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text);
+  background: var(--mist); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--moss);
+  box-shadow: 0 0 0 3px rgba(45,90,27,0.08);
+}
+.form-input.error { border-color: var(--rust); }
+.form-error-msg { font-size: 0.75rem; color: var(--rust); margin-top: 4px; display: none; }
+.form-error-msg.show { display: block; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.btn-form-submit {
+  width: 100%; padding: 16px; margin-top: 8px;
+  background: var(--moss); color: #fff; border: none; border-radius: 12px;
+  font-size: 1rem; font-weight: 700; letter-spacing: 0.04em;
+  box-shadow: 0 4px 20px rgba(45,90,27,0.3);
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-form-submit:hover { background: var(--bark); transform: translateY(-1px); }
+
+/* Auth modal tabs */
+.auth-tabs {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.auth-tab {
+  flex: 1; padding: 12px; background: none; border: none;
+  font-size: 0.9rem; font-weight: 500; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.auth-tab.active { color: var(--moss); border-color: var(--moss); font-weight: 600; }
+
+.auth-form { display: none; }
+.auth-form.active { display: block; }
+
+/* Cart sidebar */
+#cart-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 400px;
+  background: var(--mist); z-index: 2500;
+  box-shadow: -20px 0 80px rgba(28,18,9,0.2);
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.32,0,0.67,0);
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+#cart-panel.open { transform: translateX(0); transition-timing-function: cubic-bezier(0.33,1,0.68,1); }
+#cart-overlay {
+  position: fixed; inset: 0; background: rgba(28,18,9,0.5);
+  z-index: 2400; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+#cart-overlay.open { opacity: 1; pointer-events: all; }
+
+.cart-header {
+  padding: 28px 28px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--mist); z-index: 1;
+}
+.cart-header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 900; color: var(--soil);
+}
+.cart-close-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--border);
+  border: none; font-size: 1.2rem; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.cart-close-btn:hover { background: #ddd; }
+
+.cart-items { flex: 1; padding: 20px 28px; }
+.cart-empty {
+  text-align: center; padding: 60px 0; color: var(--muted);
+  font-size: 0.9rem; display: none;
+}
+.cart-empty.show { display: block; }
+.cart-empty-icon { font-size: 3.5rem; margin-bottom: 12px; }
+
+.cart-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 0; border-bottom: 1px solid var(--border);
+}
+.cart-item-img {
+  width: 56px; height: 56px; border-radius: 10px; object-fit: cover;
+  background: var(--sky); flex-shrink: 0;
+}
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem; font-weight: 700; color: var(--soil);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cart-item-price { font-size: 0.82rem; color: var(--moss); font-weight: 600; margin-top: 2px; }
+.cart-item-qty {
+  display: flex; align-items: center; gap: 8px;
+}
+.qty-btn {
+  width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border);
+  background: #fff; font-size: 1rem; color: var(--soil);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+.qty-btn:hover { background: var(--moss); color: #fff; border-color: var(--moss); }
+.qty-num { font-size: 0.9rem; font-weight: 600; min-width: 20px; text-align: center; }
+.cart-item-remove {
+  background: none; border: none; color: var(--muted);
+  font-size: 1rem; padding: 4px; transition: color 0.2s;
+}
+.cart-item-remove:hover { color: var(--rust); }
+
+.cart-footer {
+  padding: 20px 28px 32px; border-top: 1px solid var(--border);
+  background: var(--mist);
+  position: sticky; bottom: 0;
+}
+.cart-summary-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+  font-size: 0.88rem; color: var(--muted);
+}
+.cart-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 16px 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 900; color: var(--soil);
+}
+.cart-checkout-btn {
+  width: 100%; padding: 18px; background: var(--moss); color: #fff; border: none;
+  border-radius: 12px; font-size: 1rem; font-weight: 700;
+  box-shadow: 0 4px 20px rgba(45,90,27,0.3);
+  transition: background 0.2s, transform 0.15s;
+}
+.cart-checkout-btn:hover { background: var(--bark); transform: translateY(-1px); }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+#toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 5000;
+  background: var(--soil); color: var(--cream);
+  padding: 16px 24px; border-radius: 12px;
+  font-size: 0.88rem; font-weight: 500;
+  box-shadow: 0 8px 36px rgba(28,18,9,0.3);
+  display: flex; align-items: center; gap: 12px;
+  transform: translateY(80px) scale(0.96); opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.34,1.3,0.64,1), opacity 0.3s;
+  max-width: 340px;
+}
+#toast.show { transform: translateY(0) scale(1); opacity: 1; }
+#toast .toast-icon {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--leaf); color: #fff;
+  font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+.sr {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.sr.in { opacity: 1; transform: none; }
+.sr-delay-1 { transition-delay: 0.1s; }
+.sr-delay-2 { transition-delay: 0.2s; }
+.sr-delay-3 { transition-delay: 0.3s; }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes floatUpDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes ticker {
+  to { transform: translateX(-50%); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .eq-grid { grid-template-columns: 1fr 1fr; }
+  .products-grid { grid-template-columns: 1fr 1fr; }
+  .detail-layout { grid-template-columns: 1fr; }
+  .detail-sections { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  nav { padding: 16px 24px; }
+  .nav-center { display: none; }
+  .nav-actions .nav-btn-ghost { display: none; }
+  .nav-hamburger { display: flex; }
+
+  section { padding: 64px 24px; }
+  .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; gap: 40px; }
+  .hero-right { display: none; }
+  .hero-stats { gap: 28px; }
+  .eq-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .eq-grid { grid-template-columns: 1fr; }
+  .how-grid { grid-template-columns: 1fr; gap: 40px; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .products-grid { grid-template-columns: 1fr 1fr; }
+  .products-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+  footer { padding: 48px 24px 32px; }
+  .detail-wrap { padding: 80px 24px 40px; }
+
+  #cart-panel { width: 100%; }
+}
+
+@media (max-width: 540px) {
+  .products-grid { grid-template-columns: 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .hero-ctas { flex-direction: column; align-items: flex-start; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .modal { padding: 28px 22px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+/* ============================================================
+   BRAND GRID (Level 1)
+   ============================================================ */
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.brand-card {
+  background: #fff; border-radius: 18px; overflow: hidden;
+  border: 1px solid var(--border); padding: 30px 26px;
+  display: flex; flex-direction: column;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s, border-color 0.3s;
+}
+.brand-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 28px 72px var(--shadow);
+  border-color: rgba(45,90,27,0.2);
+}
+.brand-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--brand-color, var(--moss));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.brand-card:hover::before { transform: scaleX(1); }
+
+/* Featured brand spans 2 columns */
+.brand-card.brand-featured {
+  grid-column: span 2;
+  flex-direction: row; gap: 30px; align-items: center; padding: 34px 38px;
+}
+
+.brand-logo-wrap {
+  width: 68px; height: 68px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; flex-shrink: 0;
+  transition: transform 0.3s;
+}
+.brand-card:hover .brand-logo-wrap { transform: scale(1.1) rotate(-4deg); }
+.brand-card.brand-featured .brand-logo-wrap { width: 88px; height: 88px; font-size: 3rem; }
+
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; font-weight: 900; color: var(--soil);
+  margin-bottom: 4px; letter-spacing: -0.01em;
+}
+.brand-card.brand-featured .brand-name { font-size: 1.7rem; }
+
+.brand-origin {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+}
+.brand-desc {
+  font-size: 0.82rem; line-height: 1.65; color: var(--muted);
+  flex: 1; margin-bottom: 18px;
+}
+.brand-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;
+}
+.brand-tag {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
+  background: var(--mist); color: var(--muted); border: 1px solid var(--border);
+}
+.brand-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 16px; border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.brand-avail-count {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 900;
+  color: var(--brand-color, var(--moss)); line-height: 1;
+}
+.brand-avail-label {
+  font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-top: 2px;
+}
+.brand-arrow {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--brand-color, var(--moss));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1rem;
+  transform: rotate(-45deg);
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.brand-card:hover .brand-arrow { transform: rotate(0deg); }
+
+/* Back button + brand logo in models view */
+.eq-back-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.84rem; font-weight: 500; color: var(--muted);
+  background: none; border: 1px solid var(--border); border-radius: 100px;
+  padding: 8px 16px;
+  transition: color 0.2s, border-color 0.2s, gap 0.2s;
+}
+.eq-back-btn:hover { color: var(--moss); border-color: var(--moss); gap: 12px; }
+.eq-back-btn svg { transition: transform 0.2s; }
+.eq-back-btn:hover svg { transform: translateX(-3px); }
+
+.eq-brand-logo-sm {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--mist); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+
+.eq-sort-select {
+  padding: 8px 14px; border-radius: 100px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 500;
+  border: 1px solid var(--border); background: #fff; color: var(--text);
+  outline: none; transition: border-color 0.2s;
+}
+.eq-sort-select:focus { border-color: var(--moss); }
+
+/* Model card: same as eq-card but with extra spec strip */
+.eq-spec-strip {
+  display: flex; border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; margin-bottom: 18px;
+}
+.eq-spec-cell {
+  flex: 1; padding: 10px 10px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+.eq-spec-cell:last-child { border-right: none; }
+.eq-spec-cell-label {
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 3px;
+}
+.eq-spec-cell-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem; font-weight: 500; color: var(--soil);
+}
+
+@media (max-width: 1100px) {
+  .brand-grid { grid-template-columns: 1fr 1fr; }
+  .brand-card.brand-featured { grid-column: span 2; }
+}
+@media (max-width: 900px) {
+  .brand-grid { grid-template-columns: 1fr; }
+  .brand-card.brand-featured { grid-column: span 1; flex-direction: column; }
+  .eq-sort-select { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== CUSTOM CURSOR ===== -->
+<div id="cursor-dot"></div>
+<div id="cursor-circle"></div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"><div class="toast-icon">✓</div><span id="toast-msg">Done</span></div>
+
+<!-- ===== CART OVERLAY ===== -->
+<div id="cart-overlay" onclick="closeCart()"></div>
+
+<!-- ===== CART PANEL ===== -->
+<div id="cart-panel" role="dialog" aria-label="Shopping cart">
+  <div class="cart-header">
+    <span class="cart-header-title">Your Cart</span>
+    <button class="cart-close-btn" onclick="closeCart()" aria-label="Close cart">×</button>
+  </div>
+  <div class="cart-items">
+    <div class="cart-empty" id="cart-empty">
+      <div class="cart-empty-icon">🧺</div>
+      <p>Your cart is empty.</p>
+      <p style="margin-top:6px;font-size:0.8rem;">Add farm products to get started.</p>
+    </div>
+    <div id="cart-items-list"></div>
+  </div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-summary-row"><span>Subtotal</span><span id="cart-subtotal">KES 0</span></div>
+    <div class="cart-summary-row"><span>Delivery (Nairobi)</span><span>KES 250</span></div>
+    <div class="cart-total-row"><span>Total</span><span id="cart-total">KES 250</span></div>
+    <button class="cart-checkout-btn" onclick="checkout()">Proceed to Checkout →</button>
+  </div>
+</div>
+
+<!-- ===== MOBILE DRAWER ===== -->
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="#equipment" onclick="closeMobileDrawer()">Equipment</a>
+  <a href="#how" onclick="closeMobileDrawer()">How It Works</a>
+  <a href="#products" onclick="closeMobileDrawer()">Farm Products</a>
+  <a href="#testimonials" onclick="closeMobileDrawer()">Reviews</a>
+  <a href="#" onclick="openAuth(); closeMobileDrawer();">Sign In</a>
+</div>
+
+<!-- ===== AUTH MODAL ===== -->
+<div class="modal-overlay" id="auth-modal" role="dialog" aria-modal="true" aria-label="Authentication">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()" aria-label="Close">×</button>
+    <h2 class="modal-title">Welcome Back</h2>
+    <p class="modal-sub">Sign in to access bookings, track orders, and manage listings.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+    <!-- Login -->
+    <div class="auth-form active" id="auth-login">
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email Address</label>
+        <input class="form-input" type="email" id="login-email" placeholder="farmer@example.com" autocomplete="email"/>
+        <div class="form-error-msg" id="login-email-err">Please enter a valid email.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-pass">Password</label>
+        <input class="form-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+        <div class="form-error-msg" id="login-pass-err">Password is required.</div>
+      </div>
+      <button class="btn-form-submit" onclick="handleLogin()">Sign In</button>
+      <p style="text-align:center;font-size:0.8rem;color:var(--muted);margin-top:14px;">
+        <a href="#" style="color:var(--moss);text-decoration:none;">Forgot password?</a>
+      </p>
+    </div>
+    <!-- Register -->
+    <div class="auth-form" id="auth-register">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="reg-fname">First Name</label>
+          <input class="form-input" type="text" id="reg-fname" placeholder="James"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-lname">Last Name</label>
+          <input class="form-input" type="text" id="reg-lname" placeholder="Kamau"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-email">Email Address</label>
+        <input class="form-input" type="email" id="reg-email" placeholder="farmer@example.com"/>
+        <div class="form-error-msg" id="reg-email-err">Please enter a valid email.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-phone">Phone (M-Pesa)</label>
+        <input class="form-input" type="tel" id="reg-phone" placeholder="+254 7XX XXX XXX"/>
+        <div class="form-error-msg" id="reg-phone-err">Enter a valid Kenyan number.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-pass">Password (min 8 chars)</label>
+        <input class="form-input" type="password" id="reg-pass" placeholder="••••••••"/>
+        <div class="form-error-msg" id="reg-pass-err">Password must be at least 8 characters.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-role">I am a</label>
+        <select class="form-select" id="reg-role">
+          <option value="">Select role...</option>
+          <option value="farmer">Farmer (renting equipment)</option>
+          <option value="owner">Equipment Owner (listing machines)</option>
+          <option value="buyer">Produce Buyer</option>
+        </select>
+      </div>
+      <button class="btn-form-submit" onclick="handleRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOOKING MODAL ===== -->
+<div class="modal-overlay" id="booking-modal" role="dialog" aria-modal="true" aria-label="Book equipment">
+  <div class="modal">
+    <button class="modal-close" onclick="closeBooking()" aria-label="Close">×</button>
+    <h2 class="modal-title" id="booking-title">Book Equipment</h2>
+    <p class="modal-sub">We confirm within 2 hours. Pay via M-Pesa or card at pickup.</p>
+    <div class="form-group">
+      <label class="form-label" for="b-name">Full Name</label>
+      <input class="form-input" type="text" id="b-name" placeholder="James Kamau"/>
+      <div class="form-error-msg" id="b-name-err">Full name is required.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="b-phone">Phone (M-Pesa)</label>
+        <input class="form-input" type="tel" id="b-phone" placeholder="07XX XXX XXX"/>
+        <div class="form-error-msg" id="b-phone-err">Valid phone required.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="b-date">Start Date</label>
+        <input class="form-input" type="date" id="b-date"/>
+        <div class="form-error-msg" id="b-date-err">Select a future date.</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="b-duration">Duration</label>
+      <select class="form-select" id="b-duration">
+        <option value="">Choose rental period...</option>
+        <option value="half">Half Day — 4hrs</option>
+        <option value="full">Full Day — 8hrs</option>
+        <option value="week">Weekly — 7 days</option>
+        <option value="month">Monthly</option>
+      </select>
+      <div class="form-error-msg" id="b-duration-err">Select a duration.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="b-location">Farm Location / County</label>
+      <input class="form-input" type="text" id="b-location" placeholder="e.g. Eldoret, Uasin Gishu"/>
+      <div class="form-error-msg" id="b-location-err">Location is required.</div>
+    </div>
+    <div id="booking-price-summary" style="background:var(--mist);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:0.85rem;color:var(--muted);display:none;">
+      <div style="display:flex;justify-content:space-between;"><span>Equipment rate</span><span id="bps-rate">—</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--soil);">
+        <span>Estimated Total</span><span id="bps-total" style="color:var(--moss);">—</span>
+      </div>
+    </div>
+    <button class="btn-form-submit" onclick="submitBooking()">Confirm Booking</button>
+  </div>
+</div>
+
+<!-- ===== EQUIPMENT DETAIL ===== -->
+<div id="eq-detail" role="dialog" aria-modal="true" aria-label="Equipment detail">
+  <div class="detail-wrap">
+    <button class="detail-back" onclick="closeDetail()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M15 10H5M5 10L10 5M5 10L10 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to Equipment
+    </button>
+    <div class="detail-layout">
+      <div class="detail-gallery">
+        <img class="detail-main-img" id="detail-main-img" src="" alt=""/>
+        <div class="detail-thumbs" id="detail-thumbs"></div>
+      </div>
+      <div class="detail-info">
+        <div>
+          <span class="detail-status-badge" id="detail-badge">Available</span>
+          <h1 class="detail-title" id="detail-name">—</h1>
+          <div class="detail-location" id="detail-loc">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span></span>
+          </div>
+          <div class="detail-rating">
+            <span class="detail-stars" id="detail-stars">★★★★★</span>
+            <span class="detail-review-count" id="detail-reviews">(0 reviews)</span>
+          </div>
+        </div>
+        <div class="detail-price-box">
+          <div class="detail-price-row">
+            <span class="detail-price-main" id="detail-price">KES 0</span>
+            <span class="detail-price-per">/day</span>
+          </div>
+          <p class="detail-price-note">Rate includes operator and fuel. Insurance covered.</p>
+          <button class="detail-book-btn" id="detail-book-btn" onclick="openBooking()">Book Now</button>
+        </div>
+        <div class="detail-owner-card">
+          <div class="detail-owner-avatar" id="detail-owner-av">OW</div>
+          <div>
+            <div class="detail-owner-name" id="detail-owner-name">Owner</div>
+            <div class="detail-owner-sub">Verified · Responds within 2 hrs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-sections">
+      <div>
+        <div class="detail-section-card">
+          <h3 class="detail-section-title">Description</h3>
+          <p class="detail-description" id="detail-desc">—</p>
+        </div>
+        <div class="detail-section-card" style="margin-top:20px;">
+          <h3 class="detail-section-title">Specifications</h3>
+          <div class="specs-grid" id="detail-specs"></div>
+        </div>
+        <div class="detail-section-card" style="margin-top:20px;">
+          <h3 class="detail-section-title">Included Features</h3>
+          <div class="features-list" id="detail-features"></div>
+        </div>
+      </div>
+      <div>
+        <div class="detail-section-card">
+          <h3 class="detail-section-title">Availability</h3>
+          <div class="lc-wrap" id="lc-wrap">
+
+            <!-- Month navigator -->
+            <div class="lc-nav">
+              <button class="lc-arrow" id="lc-prev" aria-label="Previous month">&#8249;</button>
+              <div class="lc-month-label" id="lc-month-label">—</div>
+              <button class="lc-arrow" id="lc-next" aria-label="Next month">&#8250;</button>
+            </div>
+
+            <!-- Date grid (populated by JS) -->
+            <div class="lc-grid" id="lc-grid"></div>
+
+            <!-- Instruction hint -->
+            <div class="lc-hint" id="lc-hint">Select a start date to begin</div>
+
+            <!-- Animated price / booking card -->
+            <div class="lc-price-card" id="lc-price-card">
+              <div class="lc-price-inner">
+                <div class="lc-price-row">
+                  <span>Rental period</span>
+                  <strong id="lc-pd-dates">—</strong>
+                </div>
+                <div class="lc-price-row">
+                  <span id="lc-pd-days">— days</span>
+                  <span id="lc-pd-rate">KES 0 / day</span>
+                </div>
+                <div class="lc-price-sep"></div>
+                <div class="lc-price-total">
+                  <span class="lc-price-total-label">Estimated Total</span>
+                  <span class="lc-price-total-val" id="lc-pd-total">KES 0</span>
+                </div>
+                <button class="lc-book-btn" id="lc-book-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Book These Dates
+                </button>
+                <button class="lc-clear-btn" id="lc-clear-btn">Clear selection</button>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="lc-legend">
+              <div class="lc-legend-item"><div class="lc-legend-dot lcl-avail"></div>Available</div>
+              <div class="lc-legend-item"><div class="lc-legend-dot lcl-booked"></div>Booked</div>
+              <div class="lc-legend-item"><div class="lc-legend-dot lcl-sel"></div>Selected</div>
+              <div class="lc-legend-item"><div class="lc-legend-dot lcl-range"></div>Range</div>
+            </div>
+
+          </div><!-- /lc-wrap -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav id="navbar">
+  <a href="#" class="nav-brand" aria-label="Cornclave home">
+    <div class="nav-brand-icon" aria-hidden="true">🌾</div>
+    Corn<em>clave</em>
+  </a>
+  <div class="nav-center" role="navigation" aria-label="Main navigation">
+    <a href="#equipment" class="nav-link">Equipment</a>
+    <a href="#how" class="nav-link">How It Works</a>
+    <a href="#products" class="nav-link">Farm Products</a>
+    <a href="#testimonials" class="nav-link">Reviews</a>
+  </div>
+  <div class="nav-actions">
+    <button class="cart-btn" onclick="openCart()" aria-label="View cart">
+      🛒
+      <span class="cart-count" id="cart-count">0</span>
+    </button>
+    <button class="nav-btn-ghost" onclick="openAuth()">Sign In</button>
+    <button class="nav-btn-solid" onclick="openAuth()">List Equipment</button>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileDrawer()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" aria-label="Hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-grain" aria-hidden="true"></div>
+
+  <div class="hero-left">
+    <div class="hero-tag">Kenya's #1 Farm Platform</div>
+    <h1 class="hero-title">
+      Rent. Grow.<br/><em>Harvest More.</em>
+    </h1>
+    <p class="hero-desc">
+      Connect with equipment owners, rent powerful farm machinery by the day, and buy fresh produce directly from farmers across Kenya.
+    </p>
+    <div class="hero-ctas">
+      <a href="#equipment" class="cta-primary" onclick="document.getElementById('eq-view-brands').style.display='block'; document.getElementById('eq-view-models').style.display='none';">Browse Equipment</a>
+      <a href="#how" class="cta-secondary">
+        How it works
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </a>
+    </div>
+    <div class="hero-stats" aria-label="Platform statistics">
+      <div class="hero-stat">
+        <div class="hero-stat-n" id="stat-machines">0</div>
+        <div class="hero-stat-l">Machines Listed</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n" id="stat-farmers">0</div>
+        <div class="hero-stat-l">Farmers Served</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n" id="stat-counties">0</div>
+        <div class="hero-stat-l">Counties</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right" aria-hidden="true">
+    <div class="hero-visual-wrap">
+      <div class="hero-img-main">
+        <img src="john deere 6130R.jpg" alt="John Deere tractor in a Kenyan field" onerror="this.style.display='none'; this.parentElement.style.background='#3A6B35'"/>
+        <div class="hero-img-overlay">
+          <div class="hero-img-label">Featured Machine</div>
+          <div class="hero-img-name">John Deere 6130R</div>
+          <div class="hero-img-sub">Rift Valley · Available today</div>
+        </div>
+      </div>
+      <div class="hero-float-card">
+        <div class="fc-label">Today's Bookings</div>
+        <div class="fc-val" id="live-bookings">0</div>
+        <div class="fc-sub">↑ 12% from yesterday</div>
+      </div>
+      <div class="hero-badge-pill">⭐ 4.9 avg rating</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TICKER ===== -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <div class="ticker-item"><span class="ticker-dot"></span>Tractors</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Combine Harvesters</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Ploughs & Tillers</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Irrigation Systems</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Seed Drills</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Crop Sprayers</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Balers & Wrappers</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Row Planters</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Tractors</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Combine Harvesters</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Ploughs & Tillers</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Irrigation Systems</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Seed Drills</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Crop Sprayers</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Balers & Wrappers</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Row Planters</div>
+  </div>
+</div>
+
+<!-- ===== EQUIPMENT ===== -->
+<section class="equipment-section" id="equipment" aria-labelledby="eq-heading">
+
+  <!-- ── LEVEL 1: BRAND GRID ── -->
+  <div id="eq-view-brands">
+    <div class="eq-header">
+      <div class="eq-header-left sr">
+        <div class="section-eyebrow">Equipment Listings</div>
+        <h2 class="section-title" id="eq-heading">Browse by Brand</h2>
+        <p class="eq-header-desc">Kenya's most trusted equipment brands, all in one place. Choose a brand to explore available models near your farm.</p>
+      </div>
+      <div class="filter-bar sr sr-delay-2" role="group" aria-label="Filter brands by category">
+        <button class="filter-btn on" onclick="filterBrands(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterBrands(this,'tractor')">Tractors</button>
+        <button class="filter-btn" onclick="filterBrands(this,'harvest')">Harvesters</button>
+        <button class="filter-btn" onclick="filterBrands(this,'irrigation')">Irrigation</button>
+      </div>
+    </div>
+    <div class="brand-grid" id="brand-grid" aria-live="polite"></div>
+  </div>
+
+  <!-- ── LEVEL 2: MODELS WITHIN A BRAND ── -->
+  <div id="eq-view-models" style="display:none;">
+    <div class="eq-header" style="margin-bottom:28px;">
+      <div class="eq-header-left">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+          <button class="eq-back-btn" onclick="backToBrands()" aria-label="Back to all brands">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M13 9H5M5 9L9 5M5 9L13 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            All Brands
+          </button>
+          <div class="eq-brand-logo-sm" id="models-brand-logo">🚜</div>
+          <div>
+            <div class="section-title" id="models-brand-title" style="font-size:1.8rem;">Brand</div>
+            <div id="models-brand-sub" style="font-size:0.82rem;color:var(--muted);margin-top:2px;">0 models available</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="filter-bar" id="models-filter-bar" role="group" aria-label="Filter by type">
+          <button class="filter-btn on" onclick="filterModels(this,'all')">All Types</button>
+          <button class="filter-btn" onclick="filterModels(this,'tractor')">Tractors</button>
+          <button class="filter-btn" onclick="filterModels(this,'harvest')">Harvesters</button>
+          <button class="filter-btn" onclick="filterModels(this,'irrigation')">Irrigation</button>
+        </div>
+        <select class="eq-sort-select" id="models-sort" onchange="sortModels()" aria-label="Sort by">
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="rating">Highest Rated</option>
+          <option value="newest">Newest First</option>
+        </select>
+      </div>
+    </div>
+    <div class="eq-grid" id="models-grid" aria-live="polite"></div>
+  </div>
+
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="how-section" id="how" aria-labelledby="how-heading">
+  <div class="how-grid">
+    <div class="sr">
+      <div class="section-eyebrow">Simple Process</div>
+      <h2 class="section-title" id="how-heading">From Search to<br/><em>Harvest</em> in 3 Steps</h2>
+      <p class="how-desc">No complicated paperwork. No middlemen. Just straightforward farm machinery rental built for Kenyan farmers.</p>
+    </div>
+    <div class="steps sr sr-delay-1">
+      <div class="step">
+        <div class="step-n">01</div>
+        <div>
+          <div class="step-title">Find Your Machine</div>
+          <p class="step-desc">Browse hundreds of verified machines near your farm. Filter by type, price, and real-time availability.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div>
+          <div class="step-title">Book & Pay Securely</div>
+          <p class="step-desc">Select your dates, pay via M-Pesa or card. Instant booking confirmation and receipt sent by SMS.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div>
+          <div class="step-title">Equipment Delivered</div>
+          <p class="step-desc">Owner delivers to your farm or you arrange pickup. We handle insurance and optional operator matching.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FARM PRODUCTS ===== -->
+<section class="products-section" id="products" aria-labelledby="prod-heading">
+  <div class="products-header">
+    <div class="sr">
+      <div class="section-eyebrow">Farm Products</div>
+      <h2 class="section-title" id="prod-heading">Fresh From<br/>the Farm</h2>
+      <p style="color:var(--muted);font-size:0.95rem;margin-top:12px;max-width:420px;line-height:1.75;">
+        Buy directly from verified Kenyan farmers. No middlemen, fair prices, traceable produce.
+      </p>
+    </div>
+    <a href="#" class="cta-secondary sr sr-delay-2" style="align-self:flex-end;">
+      View all products
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </a>
+  </div>
+  <div class="products-grid" id="prod-grid" aria-live="polite"></div>
+</section>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testimonials-section" id="testimonials" aria-labelledby="testi-heading">
+  <div style="text-align:center;" class="sr">
+    <div class="section-eyebrow" style="justify-content:center;">Farmer Reviews</div>
+    <h2 class="section-title" id="testi-heading">Trusted by Farmers<br/>Across Kenya</h2>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card sr">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"I rented a combine harvester through Cornclave and it was delivered to my farm in Eldoret the same day. Saved me weeks of work and the cost was very fair."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">JK</div>
+        <div>
+          <div class="testi-name">Joseph Kipchoge</div>
+          <div class="testi-role">Wheat Farmer, Uasin Gishu</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card sr sr-delay-1">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"As a machine owner, Cornclave has given me a second income. My tractor used to sit idle for months. Now it earns every week. Payments are fast and reliable."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:var(--rust);">MW</div>
+        <div>
+          <div class="testi-name">Mary Wambui</div>
+          <div class="testi-role">Equipment Owner, Nakuru</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card sr sr-delay-2">
+      <div class="testi-stars">★★★★☆</div>
+      <p class="testi-text">"We supply vegetables to Nairobi supermarkets and use Cornclave to source directly from smallholder farmers. Fresh, traceable produce at genuinely good prices."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:var(--amber);color:var(--soil);">AO</div>
+        <div>
+          <div class="testi-name">Amina Odhiambo</div>
+          <div class="testi-role">Produce Buyer, Nairobi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section" aria-label="Call to action">
+  <div class="section-eyebrow sr" style="color:rgba(255,255,255,0.5);justify-content:center;">Get Started Today</div>
+  <h2 class="cta-title sr">Your Farm Deserves<br/>Better Tools</h2>
+  <p class="cta-desc sr">Whether you're a farmer, equipment owner, or produce buyer — Cornclave connects you to Kenya's largest agricultural network.</p>
+  <div class="cta-btns sr sr-delay-1">
+    <a href="#equipment" class="btn-white">Find Equipment</a>
+    <button class="btn-outline-white" onclick="openAuth()">List Your Machine</button>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">Corn<em>clave</em></div>
+      <p class="footer-brand-desc">Kenya's leading farm machinery rental and agricultural products marketplace. Connecting farmers, owners, and buyers since 2024.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Equipment</h5>
+      <ul>
+        <li><a href="#equipment">Tractors</a></li>
+        <li><a href="#equipment">Harvesters</a></li>
+        <li><a href="#equipment">Irrigation</a></li>
+        <li><a href="#equipment">Planters</a></li>
+        <li><a href="#equipment">Sprayers</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Support</h5>
+      <ul>
+        <li><a href="#">Help Center</a></li>
+        <li><a href="#">List Equipment</a></li>
+        <li><a href="#">Insurance Info</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Use</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2025 Cornclave Farm Platform. Built for Kenyan Farmers.</p>
+    <p class="footer-mpesa">📍 Nairobi, Kenya &nbsp;·&nbsp; M-Pesa Accepted &nbsp;·&nbsp; Visa / Mastercard</p>
+  </div>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+'use strict';
+
+/* ============================================================
+   DATA LAYER
+   (In production: fetched from /api/equipment and /api/products)
+   ============================================================ */
+
+/* ---- BRANDS (Level 1) ---- */
+const BRANDS = [
+  {
+    id: 'john-deere',
+    name: 'John Deere',
+    origin: 'United States · Est. 1837',
+    emoji: '🟢',
+    logoBg: '#f0fce8',
+    color: '#2D7A1F',
+    category: 'tractor',
+    featured: true,
+    desc: 'The world\'s most recognised agricultural brand. Bulletproof reliability, dealer support across Kenya, and parts available in every major town.',
+    tags: ['Tractors', 'Harvesters', 'Planters']
+  },
+  {
+    id: 'massey-ferguson',
+    name: 'Massey Ferguson',
+    origin: 'United Kingdom · Est. 1953',
+    emoji: '🔴',
+    logoBg: '#fff0f0',
+    color: '#C0392B',
+    category: 'tractor',
+    featured: false,
+    desc: 'Kenya\'s most widely used tractor brand. Simple mechanics, affordable parts, and a reputation for durability across diverse terrain.',
+    tags: ['Tractors', 'Implements']
+  },
+  {
+    id: 'kubota',
+    name: 'Kubota',
+    origin: 'Japan · Est. 1890',
+    emoji: '🧡',
+    logoBg: '#fff5ee',
+    color: '#E07020',
+    category: 'tractor',
+    featured: false,
+    desc: 'Japanese precision engineering for Kenyan farms. Low ground pressure, excellent fuel economy, and exceptional performance on coastal farms.',
+    tags: ['Tractors', 'Cultivators', 'Rice']
+  },
+  {
+    id: 'new-holland',
+    name: 'New Holland',
+    origin: 'Italy · Est. 1895',
+    emoji: '🔵',
+    logoBg: '#eef4ff',
+    color: '#1A56C4',
+    category: 'harvest',
+    featured: false,
+    desc: 'High-capacity combine harvesters engineered for wheat, maize, and barley. GPS-guided precision harvesting with minimal grain loss.',
+    tags: ['Harvesters', 'Tractors', 'GPS']
+  },
+  {
+    id: 'claas',
+    name: 'CLAAS',
+    origin: 'Germany · Est. 1913',
+    emoji: '🟡',
+    logoBg: '#fffde8',
+    color: '#C8A000',
+    category: 'harvest',
+    featured: false,
+    desc: 'German engineering for compact, high-efficiency harvesting. The Crop Tiger series is the leading choice for rice and small grains across East Africa.',
+    tags: ['Harvesters', 'Balers', 'Rice']
+  },
+  {
+    id: 'valley',
+    name: 'Valley Irrigation',
+    origin: 'United States · Est. 1954',
+    emoji: '💧',
+    logoBg: '#eaf6ff',
+    color: '#0A7ABF',
+    category: 'irrigation',
+    featured: false,
+    desc: 'The global leader in center pivot irrigation. Automated, GPS-enabled systems covering 50+ acres per pivot — essential for arid Kenyan regions.',
+    tags: ['Center Pivot', 'Automation', 'GPS']
+  }
+];
+
+/* ---- EQUIPMENT (Level 2 & 3) — each item has a brandId linking to BRANDS ---- */
+const EQUIPMENT = [
+  {
+    id: 0, brandId: 'john-deere', name: "John Deere 5075E", type: "tractor",
+    modelCode: "5075E · Series 5E", hp: 75, year: 2022,
+    location: "Rift Valley", county: "Uasin Gishu", rating: 4.9, reviews: 48,
+    price: 4500, status: "available",
+    image: "john deere 5075e.jpg", emoji: "🚜",
+    owner: "James Kamau", ownerInitials: "JK",
+    description: "The John Deere 5075E is a 75HP utility tractor engineered for medium-scale farming. Equipped with a front loader and 3-point hitch, it handles ploughing, tilling, planting, and material handling with ease. Features a comfortable operator station, excellent fuel economy, and proven Kenyan field reliability.",
+    specs: { "Horsepower": "75 HP", "Engine": "JD 4045 T4i", "Transmission": "12F/12R Reverser", "Lift Capacity": "2,500 kg", "Fuel Tank": "120 L", "Year": "2022" },
+    features: ["Front loader included", "3-point hitch system", "Air-conditioned cabin", "GPS-ready", "Low hours (1,200)", "Fully serviced", "Insurance included", "Operator available"],
+    calendar: [1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1]
+  },
+  {
+    id: 1, brandId: 'new-holland', name: "New Holland TC5.90", type: "harvest",
+    modelCode: "TC5.90 · T5 Series", hp: 295, year: 2021,
+    location: "Central Kenya", county: "Laikipia", rating: 4.8, reviews: 32,
+    price: 12000, status: "available",
+    image: "New Holland TC5.90.jpg", emoji: "🌾",
+    owner: "Peter Njoroge", ownerInitials: "PN",
+    description: "A high-capacity combine harvester built for wheat, maize, and barley. IntelliSteer GPS guidance reduces overlap and maximises coverage. Large grain tank and powerful engine ensure minimal downtime during peak harvest.",
+    specs: { "Engine Power": "295 HP", "Grain Tank": "9,000 L", "Cut Width": "7.6 m", "System": "Twin rotor", "GPS": "IntelliSteer", "Year": "2021" },
+    features: ["GPS guidance included", "Auto-levelling system", "Climate-controlled cab", "Night lights for 24hr ops", "Grain unloading arm", "Low loss threshing", "Experienced operator", "Fuel included"],
+    calendar: [1,0,1,1,1,1,0,0,1,1,1,1,1,0,1,1,1,1,1,0,0,1,1,1,1,1,1,0]
+  },
+  {
+    id: 2, brandId: 'massey-ferguson', name: "Massey Ferguson 375", type: "tractor",
+    modelCode: "MF 375 · Series 300", hp: 75, year: 2019,
+    location: "Western Kenya", county: "Kakamega", rating: 4.7, reviews: 61,
+    price: 3800, status: "rented",
+    image: "massey ferguson 375.jpg", emoji: "🚜",
+    owner: "Grace Omondi", ownerInitials: "GO",
+    description: "A proven 75HP workhorse trusted by farmers across Kenya. Simple mechanical design means local repairs, minimal downtime. Excels at ploughing, planting, and general fieldwork in any season.",
+    specs: { "Horsepower": "75 HP", "Engine": "Perkins 4.41", "Transmission": "8F/2R", "PTO Power": "65 HP", "Hydraulics": "2,100 psi", "Year": "2019" },
+    features: ["Robust build quality", "Easy local maintenance", "Spare parts available", "All-implement compatible", "Fuel efficient", "Canopy included", "Tool kit provided"],
+    calendar: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  },
+  {
+    id: 3, brandId: 'valley', name: "Valley Center Pivot", type: "irrigation",
+    modelCode: "8000 Series · 400m", hp: null, year: 2020,
+    location: "Eastern Kenya", county: "Kitui", rating: 5.0, reviews: 14,
+    price: 8200, status: "available",
+    image: "valley centre pivots.jpg", emoji: "💧",
+    owner: "Ahmed Hassan", ownerInitials: "AH",
+    description: "A 400-metre Valley Center Pivot covering up to 50 acres per rotation. Automated timer controls allow scheduled irrigation cycles for optimal water usage. Ideal for maize, wheat, and horticulture in arid regions.",
+    specs: { "Length": "400 m", "Coverage": "50 acres", "Flow Rate": "200 m³/hr", "Spans": "12 towers", "Control": "Auto / timer", "Power": "Diesel / Electric" },
+    features: ["Automated timer controls", "Variable rate irrigation", "GPS corner control", "Remote monitoring", "Installation included", "Technical support on call", "Water pump included", "Training provided"],
+    calendar: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  },
+  {
+    id: 4, brandId: 'claas', name: "CLAAS Crop Tiger 30", type: "harvest",
+    modelCode: "Crop Tiger 30", hp: 220, year: 2020,
+    location: "Nakuru", county: "Nakuru", rating: 4.6, reviews: 27,
+    price: 9500, status: "available",
+    image: "CLAAS Crop Tiger 30.jpg", emoji: "🌾",
+    owner: "Sarah Kimani", ownerInitials: "SK",
+    description: "A compact harvester purpose-built for rice, wheat, and small grains. Its smaller footprint is perfect for fields with limited access. Professional-grade performance with minimal grain loss despite its compact size.",
+    specs: { "Engine": "MB 6-cylinder", "Power": "220 HP", "Grain Tank": "6,000 L", "Cut Width": "5.4 m", "Weight": "12,000 kg", "Year": "2020" },
+    features: ["Compact for small fields", "Low ground pressure", "Rice harvesting optimised", "Reduced crop loss tech", "Easy transport", "Quick setup", "Operator included"],
+    calendar: [1,1,0,1,1,1,0,1,1,1,0,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1]
+  },
+  {
+    id: 5, brandId: 'kubota', name: "Kubota M7060", type: "tractor",
+    modelCode: "M7060 · M Series", hp: 70, year: 2023,
+    location: "Coast Region", county: "Kilifi", rating: 4.8, reviews: 39,
+    price: 4200, status: "available",
+    image: "kubota m7060.jpg", emoji: "🚜",
+    owner: "Ali Mwinyi", ownerInitials: "AM",
+    description: "A premium 70HP Japanese tractor with precision controls and exceptional fuel efficiency. Low ground pressure design minimises soil compaction in coastal soils. Ergonomic station for long-hour comfort.",
+    specs: { "Horsepower": "70 HP", "Engine": "Kubota V3307", "Transmission": "12F/12R", "Hydraulics": "3,300 psi", "Fuel Tank": "90 L", "Year": "2023" },
+    features: ["Japanese precision engineering", "Low ground pressure tyres", "Excellent fuel economy", "Power steering", "4WD standard", "ROPS certified", "Warranty remaining", "Service records available"],
+    calendar: [1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1]
+  }
+];
+
+const PRODUCTS = [
+  { id: 0, name: "White Maize (90kg)", farmer: "Kamau Farms, Nakuru", price: 3200, image: "White Maize (90kg).jpg", emoji: "🌽" },
+  { id: 1, name: "Roma Tomatoes (1 crate)", farmer: "Wanjiku Fresh, Kirinyaga", price: 850, image: "roma tomatoes.jpg", emoji: "🍅" },
+  { id: 2, name: "Irish Potatoes (50kg)", farmer: "Mwangi Agro, Meru", price: 1800, image: "Irish-Potatoes.jpg", emoji: "🥔" },
+  { id: 3, name: "AA Coffee Beans (1kg)", farmer: "Kiambu Estates", price: 1200, image: "AA Coffee Beans (1kg).jpg", emoji: "☕" },
+  { id: 4, name: "Red Onions (25kg)", farmer: "Ochieng Farm, Kisumu", price: 1400, image: "Red Onions (25kg).jpg", emoji: "🧅" },
+  { id: 5, name: "Broccoli (5kg bundle)", farmer: "Limuru Greens", price: 600, image: "Broccoli (5kg bundle).jpg", emoji: "🥦" },
+  { id: 6, name: "French Beans (10kg)", farmer: "Njoki Export Farms", price: 980, image: "French Beans (10kg).jpg", emoji: "🫘" },
+  { id: 7, name: "Wild Honey (1 litre)", farmer: "Baringo Beekeepers", price: 750, image: "Wild Honey (1 litre).jpg", emoji: "🍯" }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  cart: [],              // { productId, qty }
+  currentEq: null,       // equipment detail open
+  currentBookingEq: null,
+  browseLevel: 'brands', // 'brands' | 'models' | 'detail'
+  currentBrand: null,    // brand object when on models view
+  modelFilter: 'all'     // active filter on models view
+};
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+const dot = document.getElementById('cursor-dot');
+const circle = document.getElementById('cursor-circle');
+let tx = 0, ty = 0, cx = 0, cy = 0;
+
+document.addEventListener('mousemove', e => {
+  tx = e.clientX; ty = e.clientY;
+  dot.style.left = tx + 'px'; dot.style.top = ty + 'px';
+});
+document.addEventListener('mousedown', () => document.body.classList.add('clicking'));
+document.addEventListener('mouseup', () => document.body.classList.remove('clicking'));
+
+(function animCursor() {
+  cx += (tx - cx) * 0.12; cy += (ty - cy) * 0.12;
+  circle.style.left = cx + 'px'; circle.style.top = cy + 'px';
+  requestAnimationFrame(animCursor);
+})();
+
+document.addEventListener('mouseover', e => {
+  if (e.target.closest('a, button, [role="button"], .eq-card, .prod-card')) {
+    document.body.classList.add('hovering');
+  }
+});
+document.addEventListener('mouseout', e => {
+  if (e.target.closest('a, button, [role="button"], .eq-card, .prod-card')) {
+    document.body.classList.remove('hovering');
+  }
+});
+
+/* ============================================================
+   COUNTERS (hero stats)
+   ============================================================ */
+function animateCounter(el, target, duration = 1800) {
+  const start = performance.now();
+  const isFloat = String(target).includes(',') || target > 100;
+  function update(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    const val = Math.round(ease * target);
+    el.textContent = val.toLocaleString() + (target >= 1000 ? '+' : '');
+    if (p < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+/* ============================================================
+   SCROLL REVEAL + INTERSECTION OBSERVER
+   ============================================================ */
+const srObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); srObserver.unobserve(e.target); } });
+}, { threshold: 0.12, rootMargin: '0px 0px -32px 0px' });
+document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
+
+// Hero stat counters triggered on viewport enter
+const heroStatsEl = document.querySelector('.hero-stats');
+const heroStatsObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    animateCounter(document.getElementById('stat-machines'), 1200);
+    animateCounter(document.getElementById('stat-farmers'), 8400);
+    animateCounter(document.getElementById('stat-counties'), 47);
+    animateCounter(document.getElementById('live-bookings'), 34, 1200);
+    heroStatsObserver.disconnect();
+  }
+}, { threshold: 0.5 });
+heroStatsObserver.observe(heroStatsEl);
+
+/* ============================================================
+   NAVBAR SCROLL
+   ============================================================ */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('stuck', window.scrollY > 40);
+});
+
+/* ============================================================
+   MOBILE DRAWER
+   ============================================================ */
+const drawer = document.getElementById('mobile-drawer');
+const hamburger = document.getElementById('nav-hamburger');
+function toggleMobileDrawer() {
+  const open = drawer.classList.toggle('open');
+  hamburger.classList.toggle('open', open);
+  hamburger.setAttribute('aria-expanded', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeMobileDrawer() {
+  drawer.classList.remove('open');
+  hamburger.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+/* ============================================================
+   RENDER BRAND GRID (Level 1)
+   ============================================================ */
+function renderBrands(categoryFilter) {
+  categoryFilter = categoryFilter || 'all';
+  const grid = document.getElementById('brand-grid');
+  let brands = categoryFilter === 'all' ? BRANDS : BRANDS.filter(b => b.category === categoryFilter);
+
+  grid.innerHTML = brands.map(b => {
+    const allModels   = EQUIPMENT.filter(e => e.brandId === b.id);
+    const availModels = allModels.filter(e => e.status === 'available');
+    const featClass   = b.featured ? 'brand-featured' : '';
+    return `
+      <div class="brand-card sr ${featClass}"
+        style="--brand-color:${b.color};"
+        onclick="openBrand('${b.id}')"
+        role="button" tabindex="0"
+        aria-label="Browse ${b.name} equipment, ${availModels.length} available">
+        <div class="brand-logo-wrap" style="background:${b.logoBg};">${b.emoji}</div>
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <div class="brand-name">${b.name}</div>
+          <div class="brand-origin">${b.origin}</div>
+          <p class="brand-desc">${b.desc}</p>
+          <div class="brand-tags">${b.tags.map(t => `<span class="brand-tag">${t}</span>`).join('')}</div>
+          <div class="brand-footer">
+            <div>
+              <div class="brand-avail-count">${availModels.length}</div>
+              <div class="brand-avail-label">Available now</div>
+            </div>
+            <div class="brand-arrow" style="background:${b.color};">→</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
+}
+
+function filterBrands(btn, category) {
+  document.querySelectorAll('#eq-view-brands .filter-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderBrands(category);
+}
+
+/* ============================================================
+   OPEN BRAND → LEVEL 2 (Models within a brand)
+   ============================================================ */
+function openBrand(brandId) {
+  const brand = BRANDS.find(b => b.id === brandId);
+  if (!brand) return;
+  state.currentBrand = brand;
+  state.browseLevel = 'models';
+  state.modelFilter = 'all';
+
+  document.getElementById('models-brand-logo').textContent  = brand.emoji;
+  document.getElementById('models-brand-logo').style.background = brand.logoBg;
+  document.getElementById('models-brand-title').textContent = brand.name;
+
+  // Reset filter chips to "All"
+  document.querySelectorAll('#models-filter-bar .filter-btn').forEach((b,i) => b.classList.toggle('on', i===0));
+
+  renderModels('all');
+
+  document.getElementById('eq-view-brands').style.display = 'none';
+  document.getElementById('eq-view-models').style.display = 'block';
+  window.scrollTo({ top: document.getElementById('equipment').offsetTop - 80, behavior: 'smooth' });
+}
+
+function backToBrands() {
+  state.browseLevel = 'brands';
+  state.currentBrand = null;
+  document.getElementById('eq-view-models').style.display = 'none';
+  document.getElementById('eq-view-brands').style.display = 'block';
+  window.scrollTo({ top: document.getElementById('equipment').offsetTop - 80, behavior: 'smooth' });
+}
+
+/* ============================================================
+   RENDER MODELS GRID (Level 2)
+   ============================================================ */
+function renderModels(typeFilter) {
+  if (!state.currentBrand) return;
+  state.modelFilter = typeFilter;
+  const sort = document.getElementById('models-sort').value;
+
+  let items = EQUIPMENT.filter(e => e.brandId === state.currentBrand.id);
+  if (typeFilter !== 'all') items = items.filter(e => e.type === typeFilter);
+
+  if (sort === 'price-asc')  items = [...items].sort((a,b) => a.price - b.price);
+  if (sort === 'price-desc') items = [...items].sort((a,b) => b.price - a.price);
+  if (sort === 'rating')     items = [...items].sort((a,b) => b.rating - a.rating);
+  if (sort === 'newest')     items = [...items].sort((a,b) => (b.year||0) - (a.year||0));
+
+  const avail = items.filter(i => i.status === 'available').length;
+  document.getElementById('models-brand-sub').textContent =
+    `${items.length} model${items.length!==1?'s':''} · ${avail} available now`;
+
+  const grid = document.getElementById('models-grid');
+  grid.innerHTML = items.length ? items.map(eq => {
+    const specEntries = Object.entries(eq.specs).slice(0, 3);
+    return `
+      <article class="eq-card sr" data-type="${eq.type}"
+        onclick="openDetail(${eq.id})" role="button" tabindex="0"
+        aria-label="View details for ${eq.name}">
+        <div class="eq-img-wrap">
+          <img src="${eq.image}" alt="${eq.name}"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
+          <div class="eq-emoji" style="display:none">${eq.emoji}</div>
+          <span class="eq-status-badge ${eq.status==='available'?'status-available':'status-rented'}">
+            ${eq.status==='available'?'Available':'Rented'}
+          </span>
+          ${eq.hp ? `<span class="eq-type-chip">${eq.hp} HP</span>` : `<span class="eq-type-chip">${eq.type.charAt(0).toUpperCase()+eq.type.slice(1)}</span>`}
+        </div>
+        <div class="eq-body">
+          ${eq.modelCode ? `<div style="font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">${eq.modelCode}</div>` : ''}
+          <h3 class="eq-name">${eq.name}</h3>
+          <div class="eq-meta">
+            <span class="eq-meta-item">📍 ${eq.location}</span>
+            <span class="eq-meta-item">⭐ ${eq.rating} (${eq.reviews})</span>
+            ${eq.year ? `<span class="eq-meta-item">📅 ${eq.year}</span>` : ''}
+          </div>
+          <p class="eq-desc">${eq.description}</p>
+          <div class="eq-spec-strip">
+            ${specEntries.map(([k,v]) => `
+              <div class="eq-spec-cell">
+                <div class="eq-spec-cell-label">${k}</div>
+                <div class="eq-spec-cell-val">${v}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="eq-footer">
+            <div>
+              <span class="eq-price-amount">KES ${eq.price.toLocaleString()}</span>
+              <span class="eq-price-period">/day</span>
+            </div>
+            <button class="eq-book-btn"
+              onclick="event.stopPropagation(); bookEquipment(${eq.id})"
+              ${eq.status !== 'available' ? 'disabled' : ''}>
+              ${eq.status === 'available' ? 'Book Now' : 'Unavailable'}
+            </button>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('') : `<p style="color:var(--muted);padding:40px 0;">No ${typeFilter==='all'?'':typeFilter} equipment listed for ${state.currentBrand.name} yet.</p>`;
+
+  grid.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
+}
+
+function filterModels(btn, type) {
+  document.querySelectorAll('#models-filter-bar .filter-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderModels(type);
+}
+
+function sortModels() { renderModels(state.modelFilter); }
+
+/* ============================================================
+   RENDER PRODUCTS GRID
+   ============================================================ */
+function renderProducts() {
+  const grid = document.getElementById('prod-grid');
+  grid.innerHTML = PRODUCTS.map(p => `
+    <article class="prod-card sr" aria-label="${p.name}">
+      <div class="prod-img">
+        <img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
+        <div class="prod-emoji" style="display:none">${p.emoji}</div>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-farmer">By ${p.farmer}</div>
+        <div class="prod-footer">
+          <div class="prod-price">KES ${p.price.toLocaleString()}</div>
+          <button class="prod-add" onclick="addToCart(${p.id})" aria-label="Add ${p.name} to cart">+</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+  grid.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
+}
+
+/* ============================================================
+   EQUIPMENT DETAIL
+   ============================================================ */
+function openDetail(id) {
+  const eq = EQUIPMENT.find(e => e.id === id);
+  if (!eq) return;
+  state.currentEq = eq;
+  state.browseLevel = state.currentBrand ? 'models' : state.browseLevel;
+
+  // Update back button label
+  const backBtn = document.querySelector('.detail-back');
+  if (backBtn) backBtn.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M15 10H5M5 10L10 5M5 10L10 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    ${state.currentBrand ? 'Back to ' + state.currentBrand.name : 'Back to Equipment'}
+  `;
+
+  // Fill detail page
+  document.getElementById('detail-name').textContent = eq.name;
+  document.getElementById('detail-main-img').src = eq.image;
+  document.getElementById('detail-main-img').alt = eq.name;
+  document.getElementById('detail-loc').querySelector('span').textContent = eq.location;
+  document.getElementById('detail-stars').textContent = '★'.repeat(Math.floor(eq.rating));
+  document.getElementById('detail-reviews').textContent = `(${eq.reviews} reviews)`;
+  document.getElementById('detail-price').textContent = `KES ${eq.price.toLocaleString()}`;
+  document.getElementById('detail-owner-av').textContent = eq.ownerInitials;
+  document.getElementById('detail-owner-name').textContent = eq.owner;
+  document.getElementById('detail-desc').textContent = eq.description;
+
+  const badge = document.getElementById('detail-badge');
+  badge.textContent = eq.status === 'available' ? 'Available' : 'Currently Rented';
+  badge.className = `detail-status-badge ${eq.status === 'available' ? 'status-available' : 'status-rented'}`;
+
+  const bookBtn = document.getElementById('detail-book-btn');
+  bookBtn.disabled = eq.status !== 'available';
+  bookBtn.textContent = eq.status === 'available' ? 'Book Now' : 'Currently Unavailable';
+
+  // Thumbnails
+  const thumbs = document.getElementById('detail-thumbs');
+  thumbs.innerHTML = [eq.image, eq.image, eq.image, eq.image].map((img, i) => `
+    <img class="detail-thumb ${i===0?'active':''}" src="${img}" alt="${eq.name} view ${i+1}"
+      onerror="this.style.opacity='0'"
+      onclick="changeThumb('${img}', this)"/>
+  `).join('');
+
+  // Specs
+  const specsEl = document.getElementById('detail-specs');
+  specsEl.innerHTML = Object.entries(eq.specs).map(([k,v]) => `
+    <div class="spec-chip">
+      <div class="spec-label">${k}</div>
+      <div class="spec-value">${v}</div>
+    </div>
+  `).join('');
+
+  // Features
+  const featEl = document.getElementById('detail-features');
+  featEl.innerHTML = eq.features.map(f => `<div class="feature-item">${f}</div>`).join('');
+
+  // Live interactive calendar
+  LC.init(eq);
+
+  document.getElementById('eq-detail').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('eq-detail').classList.remove('open');
+  document.body.style.overflow = '';
+  // Return to whichever browse level was active
+  if (state.browseLevel === 'models' && state.currentBrand) {
+    document.getElementById('eq-view-brands').style.display = 'none';
+    document.getElementById('eq-view-models').style.display = 'block';
+  } else {
+    document.getElementById('eq-view-models').style.display = 'none';
+    document.getElementById('eq-view-brands').style.display = 'block';
+  }
+  state.currentEq = null;
+}
+
+function changeThumb(src, el) {
+  document.getElementById('detail-main-img').src = src;
+  document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function openBooking() {
+  if (state.currentEq) bookEquipment(state.currentEq.id);
+}
+
+/* ============================================================
+   BOOKING FLOW
+   ============================================================ */
+function bookEquipment(id) {
+  const eq = EQUIPMENT.find(e => e.id === id);
+  if (!eq || eq.status !== 'available') return;
+  state.currentBookingEq = eq;
+
+  document.getElementById('booking-title').textContent = 'Book: ' + eq.name;
+  updateBookingPriceSummary();
+  openModal('booking-modal');
+}
+
+function updateBookingPriceSummary() {
+  const eq = state.currentBookingEq;
+  if (!eq) return;
+  const dur = document.getElementById('b-duration').value;
+  const multipliers = { half: 0.5, full: 1, week: 6.5, month: 25 };
+  const labels = { half: 'Half day', full: '1 day', week: '7 days', month: '~25 days' };
+  if (!dur) { document.getElementById('booking-price-summary').style.display = 'none'; return; }
+  const mult = multipliers[dur] || 1;
+  const total = Math.round(eq.price * mult);
+  document.getElementById('bps-rate').textContent = `KES ${eq.price.toLocaleString()} / day`;
+  document.getElementById('bps-total').textContent = `KES ${total.toLocaleString()}`;
+  document.getElementById('booking-price-summary').style.display = 'block';
+}
+document.getElementById('b-duration').addEventListener('change', updateBookingPriceSummary);
+
+function submitBooking() {
+  const name = document.getElementById('b-name').value.trim();
+  const phone = document.getElementById('b-phone').value.trim();
+  const date = document.getElementById('b-date').value;
+  const duration = document.getElementById('b-duration').value;
+  const location = document.getElementById('b-location').value.trim();
+
+  let valid = true;
+  const phoneRegex = /^(\+?254|0)[17]\d{8}$/;
+  const today = new Date().toISOString().split('T')[0];
+
+  function setErr(id, msg, show) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.classList.toggle('show', show);
+    document.getElementById(id.replace('-err','')).classList.toggle('error', show);
+    if (show) valid = false;
+  }
+
+  setErr('b-name-err', 'Full name is required.', !name);
+  setErr('b-phone-err', 'Enter a valid Kenyan number (07XX or +254).', !phoneRegex.test(phone.replace(/\s/g,'')));
+  setErr('b-date-err', 'Select a future date.', !date || date < today);
+  setErr('b-duration-err', 'Select a duration.', !duration);
+  setErr('b-location-err', 'Farm location is required.', !location);
+
+  if (!valid) return;
+
+  // Simulate API call
+  const btn = document.querySelector('#booking-modal .btn-form-submit');
+  btn.textContent = 'Confirming…'; btn.disabled = true;
+  setTimeout(() => {
+    closeModal('booking-modal');
+    btn.textContent = 'Confirm Booking'; btn.disabled = false;
+    document.querySelectorAll('#booking-modal .form-input, #booking-modal .form-select').forEach(i => i.value = '');
+    document.getElementById('booking-price-summary').style.display = 'none';
+    showToast(`✅ Booking confirmed for ${state.currentBookingEq?.name}! We'll call you shortly.`);
+    state.currentBookingEq = null;
+  }, 1400);
+}
+
+/* ============================================================
+   CART
+   ============================================================ */
+function addToCart(productId) {
+  const prod = PRODUCTS.find(p => p.id === productId);
+  if (!prod) return;
+  const existing = state.cart.find(i => i.productId === productId);
+  if (existing) existing.qty++;
+  else state.cart.push({ productId, qty: 1 });
+  renderCart();
+  showToast(`${prod.name} added to cart`);
+}
+
+function removeFromCart(productId) {
+  state.cart = state.cart.filter(i => i.productId !== productId);
+  renderCart();
+}
+
+function changeQty(productId, delta) {
+  const item = state.cart.find(i => i.productId === productId);
+  if (!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  renderCart();
+}
+
+function renderCart() {
+  const total = state.cart.reduce((s, i) => s + i.qty, 0);
+  const countEl = document.getElementById('cart-count');
+  countEl.textContent = total;
+  countEl.classList.toggle('visible', total > 0);
+
+  const listEl = document.getElementById('cart-items-list');
+  const emptyEl = document.getElementById('cart-empty');
+  const footerEl = document.getElementById('cart-footer');
+
+  if (state.cart.length === 0) {
+    emptyEl.classList.add('show');
+    listEl.innerHTML = '';
+    footerEl.style.display = 'none';
+    return;
+  }
+  emptyEl.classList.remove('show');
+  footerEl.style.display = 'block';
+
+  listEl.innerHTML = state.cart.map(item => {
+    const p = PRODUCTS.find(p => p.id === item.productId);
+    if (!p) return '';
+    return `
+      <div class="cart-item">
+        <div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:var(--sky);">
+          <img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" 
+            onerror="this.style.display='none';this.parentElement.textContent='${p.emoji}'" alt="${p.name}"/>
+        </div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${p.name}</div>
+          <div class="cart-item-price">KES ${(p.price * item.qty).toLocaleString()}</div>
+        </div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" onclick="changeQty(${p.id}, -1)" aria-label="Decrease quantity">−</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${p.id}, 1)" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="cart-item-remove" onclick="removeFromCart(${p.id})" aria-label="Remove ${p.name}">✕</button>
+      </div>
+    `;
+  }).join('');
+
+  const subtotal = state.cart.reduce((s, i) => {
+    const p = PRODUCTS.find(p => p.id === i.productId);
+    return s + (p ? p.price * i.qty : 0);
+  }, 0);
+  const delivery = 250;
+  document.getElementById('cart-subtotal').textContent = `KES ${subtotal.toLocaleString()}`;
+  document.getElementById('cart-total').textContent = `KES ${(subtotal + delivery).toLocaleString()}`;
+}
+
+function openCart() {
+  document.getElementById('cart-panel').classList.add('open');
+  document.getElementById('cart-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCart() {
+  document.getElementById('cart-panel').classList.remove('open');
+  document.getElementById('cart-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function checkout() {
+  if (state.cart.length === 0) return;
+  const btn = document.querySelector('.cart-checkout-btn');
+  btn.textContent = 'Processing…'; btn.disabled = true;
+  setTimeout(() => {
+    state.cart = [];
+    renderCart();
+    closeCart();
+    btn.textContent = 'Proceed to Checkout →'; btn.disabled = false;
+    showToast('🛒 Order placed! You\'ll receive an SMS confirmation shortly.');
+  }, 1600);
+}
+
+/* ============================================================
+   AUTH MODAL
+   ============================================================ */
+function openAuth() { openModal('auth-modal'); }
+function closeAuth() { closeModal('auth-modal'); }
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register')));
+  document.getElementById('auth-login').classList.toggle('active', tab === 'login');
+  document.getElementById('auth-register').classList.toggle('active', tab === 'register');
+  const h2 = document.querySelector('#auth-modal .modal-title');
+  h2.textContent = tab === 'login' ? 'Welcome Back' : 'Create Account';
+}
+
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  document.getElementById('login-email-err').classList.toggle('show', !emailValid);
+  document.getElementById('login-email').classList.toggle('error', !emailValid);
+  document.getElementById('login-pass-err').classList.toggle('show', !pass);
+  document.getElementById('login-pass').classList.toggle('error', !pass);
+  if (!emailValid || !pass) return;
+
+  const btn = document.querySelector('#auth-login .btn-form-submit');
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+  setTimeout(() => {
+    closeModal('auth-modal');
+    btn.textContent = 'Sign In'; btn.disabled = false;
+    showToast('👋 Signed in successfully!');
+  }, 1200);
+}
+
+function handleRegister() {
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const phoneRegex = /^(\+?254|0)[17]\d{8}$/;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const phoneValid = phoneRegex.test(phone.replace(/\s/g,''));
+  const passValid = pass.length >= 8;
+
+  document.getElementById('reg-email-err').classList.toggle('show', !emailValid);
+  document.getElementById('reg-email').classList.toggle('error', !emailValid);
+  document.getElementById('reg-phone-err').classList.toggle('show', !phoneValid);
+  document.getElementById('reg-phone').classList.toggle('error', !phoneValid);
+  document.getElementById('reg-pass-err').classList.toggle('show', !passValid);
+  document.getElementById('reg-pass').classList.toggle('error', !passValid);
+  if (!emailValid || !phoneValid || !passValid) return;
+
+  const btn = document.querySelector('#auth-register .btn-form-submit');
+  btn.textContent = 'Creating account…'; btn.disabled = true;
+  setTimeout(() => {
+    closeModal('auth-modal');
+    btn.textContent = 'Create Account'; btn.disabled = false;
+    showToast('🎉 Account created! Welcome to Cornclave.');
+  }, 1400);
+}
+
+/* ============================================================
+   MODAL HELPERS
+   ============================================================ */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Click outside to close
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+});
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => {
+      m.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    if (document.getElementById('eq-detail').classList.contains('open')) closeDetail();
+    if (document.getElementById('cart-panel').classList.contains('open')) closeCart();
+    if (document.getElementById('mobile-drawer').classList.contains('open')) closeMobileDrawer();
+  }
+});
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer;
+function showToast(msg) {
+  clearTimeout(toastTimer);
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast').classList.add('show');
+  toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 3600);
+}
+
+/* ============================================================
+   KEYBOARD ACCESSIBILITY — Equipment cards
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.classList.contains('eq-card')) {
+    document.activeElement.click();
+  }
+});
+
+/* ============================================================
+   LIVE AVAILABILITY CALENDAR  — full implementation
+   ============================================================ */
+const LC = (() => {
+  // ── private state ─────────────────────────────────────────
+  let _eq        = null;   // current equipment object
+  let _booked    = new Set(); // Set of "YYYY-MM-DD" strings
+  let _vy        = 0;      // view year
+  let _vm        = 0;      // view month (0-based)
+  let _start     = null;   // selection start timestamp
+  let _end       = null;   // selection end timestamp
+  let _hover     = null;   // hover timestamp (ghost preview)
+
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+
+  // ── date helpers ──────────────────────────────────────────
+  function _ts(y, m, d)  { return new Date(y, m, d).getTime(); }
+  function _str(ts)       {
+    const d = new Date(ts);
+    return d.getFullYear() + '-' +
+           String(d.getMonth()+1).padStart(2,'0') + '-' +
+           String(d.getDate()).padStart(2,'0');
+  }
+  function _display(ts)   {
+    const d = new Date(ts);
+    return d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
+  }
+
+  // ── build booked-date set from equipment.calendar array ───
+  // equipment.calendar is a 28-element array where 0 = booked, 1 = available.
+  // Element 0 corresponds to the Sunday of the current week.
+  function _buildBooked(eq) {
+    const s = new Set();
+    const now = new Date(); now.setHours(0,0,0,0);
+    const sun = new Date(now);
+    sun.setDate(now.getDate() - now.getDay());
+    for (let i = 0; i < eq.calendar.length; i++) {
+      if (eq.calendar[i] === 0) {
+        const d = new Date(sun);
+        d.setDate(sun.getDate() + i);
+        s.add(_str(d.getTime()));
+      }
+    }
+    return s;
+  }
+
+  // ── render the calendar grid ───────────────────────────────
+  function _render() {
+    const grid  = document.getElementById('lc-grid');
+    const label = document.getElementById('lc-month-label');
+    const prev  = document.getElementById('lc-prev');
+    const next  = document.getElementById('lc-next');
+    if (!grid) return;
+
+    label.textContent = MONTHS[_vm] + ' ' + _vy;
+
+    const now = new Date(); now.setHours(0,0,0,0);
+    const todayTs = now.getTime();
+    prev.disabled = (_vy === now.getFullYear() && _vm === now.getMonth());
+
+    const firstDow    = new Date(_vy, _vm, 1).getDay();
+    const daysInMonth = new Date(_vy, _vm + 1, 0).getDate();
+
+    const dows = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+    let html = dows.map(d => `<div class="lc-dow">${d}</div>`).join('');
+
+    // Leading empty cells
+    for (let i = 0; i < firstDow; i++) {
+      html += `<div class="lc-cell lc-empty"></div>`;
+    }
+
+    // Ghost range end (hover before end confirmed)
+    const ghostEnd = (_start && !_end && _hover) ? _hover : null;
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ts     = _ts(_vy, _vm, d);
+      const ds     = _str(ts);
+      const isPast   = ts < todayTs;
+      const isToday  = ts === todayTs;
+      const isBooked = _booked.has(ds);
+      const isStart  = _start && ts === _start;
+      const isEnd    = _end   && ts === _end;
+      const lo       = (_start && _end) ? Math.min(_start, _end) : null;
+      const hi       = (_start && _end) ? Math.max(_start, _end) : null;
+      const inRange  = lo && hi && ts > lo && ts < hi;
+
+      // Ghost hover range
+      const glo = _start && ghostEnd ? Math.min(_start, ghostEnd) : null;
+      const ghi = _start && ghostEnd ? Math.max(_start, ghostEnd) : null;
+      const isGhostS = _start && ghostEnd && ts === _start && ts !== ghostEnd;
+      const isGhostE = _start && ghostEnd && ts === ghostEnd && ts !== _start;
+      const inGhost  = glo && ghi && ts > glo && ts < ghi && !isBooked;
+
+      let cls = 'lc-cell';
+      if      (isPast)   cls += ' lc-past';
+      else if (isBooked) cls += ' lc-booked';
+      else               cls += ' lc-avail';
+
+      if (isToday)                cls += ' lc-today';
+      if (isStart)                cls += ' lc-s';
+      if (isEnd && !isStart)      cls += ' lc-e';
+      if (isStart && isEnd)       cls += ' lc-e'; // single-day = both endpoints
+      if (inRange && !isBooked)   cls += ' lc-range';
+
+      // Ghost (only when we have a start but no confirmed end)
+      if (!_end) {
+        if (isGhostS)              cls += ' lc-ghost-s';
+        else if (isGhostE)         cls += ' lc-ghost-e';
+        else if (inGhost)          cls += ' lc-ghost';
+      }
+
+      const clickable = !isPast && !isBooked;
+      html += `<div class="${cls}"
+        data-ts="${ts}"
+        data-ok="${clickable ? 1 : 0}">${d}</div>`;
+    }
+
+    grid.innerHTML = html;
+  }
+
+  // ── hint helper ────────────────────────────────────────────
+  function _hint(msg, active) {
+    const h = document.getElementById('lc-hint');
+    if (!h) return;
+    h.textContent = msg;
+    h.classList.toggle('picking', !!active);
+  }
+
+  // ── update the price card ──────────────────────────────────
+  function _updateCard() {
+    const card = document.getElementById('lc-price-card');
+    if (!card || !_start || !_end) return;
+    const days  = Math.round((_end - _start) / 86400000) + 1;
+    const total = days * (_eq ? _eq.price : 0);
+    document.getElementById('lc-pd-dates').textContent =
+      _display(_start) + ' → ' + _display(_end);
+    document.getElementById('lc-pd-days').textContent =
+      days + (days === 1 ? ' day' : ' days');
+    document.getElementById('lc-pd-rate').textContent =
+      'KES ' + (_eq ? _eq.price.toLocaleString() : 0) + ' / day';
+    document.getElementById('lc-pd-total').textContent =
+      'KES ' + total.toLocaleString();
+    card.classList.add('open');
+  }
+
+  // ── check that no booked dates fall inside [_start, _end] ──
+  function _hasConflict() {
+    if (!_start || !_end) return false;
+    const lo = Math.min(_start, _end);
+    const hi = Math.max(_start, _end);
+    for (let t = lo; t <= hi; t += 86400000) {
+      if (_booked.has(_str(t))) return true;
+    }
+    return false;
+  }
+
+  // ── event-delegation click handler (attached once to document)
+  function _onClick(e) {
+    // Month navigation
+    const prev = e.target.closest('#lc-prev');
+    const next = e.target.closest('#lc-next');
+    if (prev && !prev.disabled) {
+      _vm--;
+      if (_vm < 0) { _vm = 11; _vy--; }
+      _render(); return;
+    }
+    if (next) {
+      _vm++;
+      if (_vm > 11) { _vm = 0; _vy++; }
+      _render(); return;
+    }
+
+    // Clear button
+    if (e.target.closest('#lc-clear-btn')) {
+      _start = null; _end = null; _hover = null;
+      const card = document.getElementById('lc-price-card');
+      if (card) card.classList.remove('open');
+      _hint('Select a start date to begin', false);
+      _render(); return;
+    }
+
+    // Book button
+    if (e.target.closest('#lc-book-btn')) {
+      _proceedToBooking(); return;
+    }
+
+    // Date cell
+    const cell = e.target.closest('.lc-cell');
+    if (!cell || cell.dataset.ok !== '1') return;
+    const ts = +cell.dataset.ts;
+
+    if (!_start || (_start && _end)) {
+      // Fresh selection start
+      _start = ts; _end = null; _hover = null;
+      _hint('Now pick an end date (or tap the same date for one day)', true);
+    } else {
+      // Confirm end date
+      if (ts === _start) {
+        _end = ts;
+      } else if (ts < _start) {
+        _end = _start; _start = ts;
+      } else {
+        _end = ts;
+      }
+      _hover = null;
+
+      if (_hasConflict()) {
+        _start = null; _end = null;
+        _hint('⚠️ Range includes booked dates — please choose again', false);
+        _render(); return;
+      }
+      _hint('✓ Dates locked in — review your booking below', false);
+      _updateCard();
+    }
+    _render();
+  }
+
+  // ── event-delegation hover handler ────────────────────────
+  function _onHover(e) {
+    const cell = e.target.closest('.lc-cell');
+    if (!cell || !cell.dataset.ts) return;
+    if (_start && !_end) {
+      const ts = +cell.dataset.ts;
+      if (ts !== _hover) { _hover = ts; _render(); }
+    }
+  }
+
+  // ── open booking modal pre-filled with calendar dates ──────
+  function _proceedToBooking() {
+    if (!_start || !_end) return;
+    const days = Math.round((_end - _start) / 86400000) + 1;
+    const fmt  = ts => new Date(ts).toISOString().split('T')[0];
+
+    document.getElementById('booking-title').textContent =
+      'Book: ' + (_eq ? _eq.name : 'Equipment');
+    document.getElementById('b-date').value = fmt(_start);
+    const dur = document.getElementById('b-duration');
+    dur.value = days >= 28 ? 'month' : days >= 7 ? 'week' : 'full';
+
+    state.currentBookingEq = _eq;
+    updateBookingPriceSummary();
+    openModal('booking-modal');
+  }
+
+  // ── init: call once per equipment detail open ──────────────
+  function init(eq) {
+    _eq     = eq;
+    _booked = _buildBooked(eq);
+    const now = new Date();
+    _vy  = now.getFullYear();
+    _vm  = now.getMonth();
+    _start = null; _end = null; _hover = null;
+
+    // Hide price card
+    const card = document.getElementById('lc-price-card');
+    if (card) card.classList.remove('open');
+
+    _hint('Select a start date to begin', false);
+    _render();
+  }
+
+  // ── wire up listeners once ─────────────────────────────────
+  document.addEventListener('click',     _onClick);
+  document.addEventListener('mouseover', _onHover);
+
+  return { init };
+})();
+
+/* ============================================================
+   MIN DATE FOR BOOKING
+   ============================================================ */
+document.getElementById('b-date').min = new Date().toISOString().split('T')[0];
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderBrands();
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>
